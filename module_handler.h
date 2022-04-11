@@ -109,8 +109,16 @@ bool init_rak1906(void);
 void start_rak1906(void);
 bool read_rak1906(void);
 uint16_t get_alt_rak1906(void);
+bool init_rak1921(void);
+void rak1921_add_line(char *line);
+void rak1921_show(void);
+void rak1921_write_header(char *header_line);
+bool init_rak12003(void);
+void read_rak12003(void);
 bool init_rak12010(void);
 void read_rak12010();
+bool init_rak12037(void);
+void read_rak12037(void);
 
 // Sensor global definitions
 extern float mean_seal_level_press;

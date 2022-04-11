@@ -169,6 +169,26 @@ void find_modules(void)
 		}
 	}
 
+	if (found_sensors[OLED_ID].found_sensor)
+	{
+		if (init_rak1921())
+		{
+			rak1921_write_header((char *)"WisBlock Node");
+		}
+		else
+		{
+			found_sensors[OLED_ID].found_sensor = false;
+		}
+	}
+
+	if (found_sensors[FIR_ID].found_sensor)
+	{
+		if (!init_rak12003())
+		{
+			found_sensors[FIR_ID].found_sensor = false;
+		}
+	}
+
 	if (found_sensors[LIGHT2_ID].found_sensor)
 	{
 		if (init_rak12010())
@@ -178,6 +198,18 @@ void find_modules(void)
 		else
 		{
 			found_sensors[LIGHT2_ID].found_sensor = false;
+		}
+	}
+
+	if (found_sensors[CO2_ID].found_sensor)
+	{
+		if (init_rak12037())
+		{
+			snprintf(g_dev_name, 9, "RUI3 Environment Sensor");
+		}
+		else
+		{
+			found_sensors[CO2_ID].found_sensor = false;
 		}
 	}
 }
@@ -219,11 +251,24 @@ void announce_modules(void)
 		read_rak1906();
 	}
 
+	if (found_sensors[FIR_ID].found_sensor)
+	{
+		MYLOG("MOD", "+EVT:RAK12003 OK\n");
+		read_rak12003();
+	}
+
 	if (found_sensors[LIGHT2_ID].found_sensor)
 	{
 		MYLOG("MOD", "+EVT:RAK12010 OK");
 		// Reading sensor data
 		read_rak12010();
+	}
+
+	if (found_sensors[CO2_ID].found_sensor)
+	{
+		MYLOG("MOD", "+EVT:RAK12037 OK");
+		// Reading sensor data
+		read_rak12037();
 	}
 }
 
@@ -260,9 +305,21 @@ void get_sensor_values(void)
 		read_rak1906();
 	}
 
+	if (found_sensors[FIR_ID].found_sensor)
+	{
+		// Read sensor data
+		read_rak12003();
+	}
+
 	if (found_sensors[LIGHT2_ID].found_sensor)
 	{
 		// Read sensor data
 		read_rak12010();
+	}
+
+	if (found_sensors[CO2_ID].found_sensor)
+	{
+		// Read sensor data
+		read_rak12037();
 	}
 }

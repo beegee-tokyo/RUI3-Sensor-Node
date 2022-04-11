@@ -22,7 +22,6 @@ WisCayenne g_solution_data(255);
 /** Set the device name, max length is 10 characters */
 char g_dev_name[64] = "RUI3 Sensor";
 
-
 // Forward declarations
 void sensor_handler(void *);
 
@@ -50,6 +49,7 @@ void joinCallback(int32_t status)
 		if (!(ret = api.lorawan.join()))
 		{
 			MYLOG("JOIN-CB", "LoRaWan OTAA - join fail! \r\n");
+			rak1921_add_line("Join NW failed");
 		}
 	}
 	else
@@ -58,6 +58,11 @@ void joinCallback(int32_t status)
 		MYLOG("JOIN-CB", "Disable ADR  %s", api.lorawan.adr.set(0) ? "Success" : "Fail");
 
 		digitalWrite(LED_BLUE, LOW);
+
+		if (found_sensors[OLED_ID].found_sensor)
+		{
+			rak1921_add_line("Joined NW");
+		}
 	}
 }
 
@@ -311,6 +316,16 @@ void sensor_handler(void *)
 
 	MYLOG("UPLINK", "Send packet at %ld", millis() / 1000);
 
+	if (found_sensors[OLED_ID].found_sensor)
+	{
+		char disp_line[254];
+		sprintf(disp_line, "Send packet %d bytes", g_solution_data.getSize());
+		rak1921_add_line(disp_line);
+		sprintf(disp_line, "Seconds since boot %ld", millis() / 1000);
+		rak1921_add_line(disp_line);
+	}
+
+	rak1921_add_line("Joined NW");
 	if (api.lorawan.send(g_solution_data.getSize(), g_solution_data.getBuffer(), 2, true, 1))
 	{
 		MYLOG("UPLINK", "Packet enqueued");
