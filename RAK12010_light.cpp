@@ -1,5 +1,5 @@
 /**
- * @file RAK12010.cpp
+ * @file RAK12010_light.cpp
  * @author Bernd Giesecke (bernd@giesecke.tk)
  * @brief Initialize and read values from the VEML7700 sensor
  * @version 0.1
