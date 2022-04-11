@@ -96,13 +96,23 @@ extern sensors_t found_sensors[];
 
 extern WisCayenne g_solution_data;
 
-/** Sensor functions */
+// Sensor functions
 bool init_rak1901(void);
 void read_rak1901(void);
 void get_rak1901_values(float *values);
+bool init_rak1902(void);
+void read_rak1902(void);
+uint16_t get_alt_rak1902(void);
+bool init_rak1903(void);
+void read_rak1903();
 bool init_rak1906(void);
 void start_rak1906(void);
 bool read_rak1906(void);
 uint16_t get_alt_rak1906(void);
+bool init_rak12010(void);
+void read_rak12010();
+
+// Sensor global definitions
+extern float mean_seal_level_press;
 
 #endif

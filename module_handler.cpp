@@ -137,6 +137,26 @@ void find_modules(void)
 		}
 	}
 
+	if (found_sensors[PRESS_ID].found_sensor)
+	{
+		if (!init_rak1902())
+		{
+			found_sensors[PRESS_ID].found_sensor = false;
+		}
+	}
+
+	if (found_sensors[LIGHT_ID].found_sensor)
+	{
+		if (init_rak1903())
+		{
+			snprintf(g_dev_name, 63, "RUI3 Weather Station");
+		}
+		else
+		{
+			found_sensors[LIGHT_ID].found_sensor = false;
+		}
+	}
+
 	if (found_sensors[ENV_ID].found_sensor)
 	{
 		if (init_rak1906())
@@ -146,6 +166,18 @@ void find_modules(void)
 		else
 		{
 			found_sensors[ENV_ID].found_sensor = false;
+		}
+	}
+
+	if (found_sensors[LIGHT2_ID].found_sensor)
+	{
+		if (init_rak12010())
+		{
+			snprintf(g_dev_name, 63, "RUI3 Weather Station");
+		}
+		else
+		{
+			found_sensors[LIGHT2_ID].found_sensor = false;
 		}
 	}
 }
@@ -159,12 +191,39 @@ void announce_modules(void)
 	if (found_sensors[TEMP_ID].found_sensor)
 	{
 		MYLOG("MOD", "+EVT:RAK1901 OK");
+		// Reading sensor data
 		read_rak1901();
+	}
+
+	if (found_sensors[PRESS_ID].found_sensor)
+	{
+		MYLOG("MOD", "+EVT:RAK1902 OK");
+		// Reading sensor data
+		read_rak1902();
+	}
+
+	if (found_sensors[LIGHT_ID].found_sensor)
+	{
+		MYLOG("MOD", "+EVT:RAK1903 OK");
+		// Reading sensor data
+		read_rak1903();
 	}
 
 	if (found_sensors[ENV_ID].found_sensor)
 	{
 		MYLOG("MOD", "+EVT:RAK1906 OK");
+		// Start reading sensor data
+		start_rak1906();
+		delay(100);
+		// Reading sensor data
+		read_rak1906();
+	}
+
+	if (found_sensors[LIGHT2_ID].found_sensor)
+	{
+		MYLOG("MOD", "+EVT:RAK12010 OK");
+		// Reading sensor data
+		read_rak12010();
 	}
 }
 
@@ -176,16 +235,34 @@ void get_sensor_values(void)
 {
 	if (found_sensors[TEMP_ID].found_sensor)
 	{
-		// Read environment data
+		// Read sensor data
 		read_rak1901();
+	}
+
+	if (found_sensors[PRESS_ID].found_sensor)
+	{
+		// Reading sensor data
+		read_rak1902();
+	}
+
+	if (found_sensors[LIGHT_ID].found_sensor)
+	{
+		// Read sensor data
+		read_rak1903();
 	}
 
 	if (found_sensors[ENV_ID].found_sensor)
 	{
-		// Start reading environment data
+		// Start reading sensor data
 		start_rak1906();
 		delay(100);
-		// Reading environment data
+		// Reading sensor data
 		read_rak1906();
+	}
+
+	if (found_sensors[LIGHT2_ID].found_sensor)
+	{
+		// Read sensor data
+		read_rak12010();
 	}
 }

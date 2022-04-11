@@ -75,7 +75,8 @@ void setup()
 	pinMode(WB_IO2, OUTPUT);
 	digitalWrite(WB_IO2, HIGH);
 
-	Serial.begin(115200, RAK_CUSTOM_MODE);
+	// Serial.begin(115200, RAK_CUSTOM_MODE);
+	Serial.begin(115200, RAK_AT_MODE);
 
 	time_t serial_timeout = millis();
 	// On nRF52840 the USB serial is not available immediately
