@@ -66,7 +66,7 @@ void start_rak1906(void)
  */
 bool read_rak1906()
 {
-	MYLOG("BME", "Start BME reading");
+	MYLOG("BME", "Reading BME680");
 	time_t wait_start = millis();
 	bool read_success = false;
 	while ((millis() - wait_start) < 5000)

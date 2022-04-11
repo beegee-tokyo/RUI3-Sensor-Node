@@ -16,6 +16,9 @@ void find_modules(void);
 void announce_modules(void);
 void get_sensor_values(void);
 
+// Forward declarations
+void sensor_handler(void *);
+
 typedef struct sensors_s
 {
 	uint8_t i2c_addr;  // I2C address
@@ -104,7 +107,14 @@ bool init_rak1902(void);
 void read_rak1902(void);
 uint16_t get_alt_rak1902(void);
 bool init_rak1903(void);
-void read_rak1903();
+void read_rak1903(void);
+bool init_rak1904(void);
+void read_rak1904(void);
+void int_assign_rak1904(uint8_t new_irq_pin);
+void clear_int_rak1904(void);
+bool init_rak1905(void);
+void read_rak1905(void);
+void clear_int_rak1905(void);
 bool init_rak1906(void);
 void start_rak1906(void);
 bool read_rak1906(void);
@@ -116,11 +126,15 @@ void rak1921_write_header(char *header_line);
 bool init_rak12003(void);
 void read_rak12003(void);
 bool init_rak12010(void);
-void read_rak12010();
+void read_rak12010(void);
 bool init_rak12037(void);
 void read_rak12037(void);
+bool init_rak12047(void);
+void read_rak12047(void);
 
 // Sensor global definitions
 extern float mean_seal_level_press;
+extern time_t last_trigger;
+extern bool motion_detected;
 
 #endif

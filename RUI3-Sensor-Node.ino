@@ -22,9 +22,6 @@ WisCayenne g_solution_data(255);
 /** Set the device name, max length is 10 characters */
 char g_dev_name[64] = "RUI3 Sensor";
 
-// Forward declarations
-void sensor_handler(void *);
-
 /**
  * @brief Callback after TX is finished
  *
@@ -80,8 +77,8 @@ void setup()
 	pinMode(WB_IO2, OUTPUT);
 	digitalWrite(WB_IO2, HIGH);
 
-	// Serial.begin(115200, RAK_CUSTOM_MODE);
-	Serial.begin(115200, RAK_AT_MODE);
+	Serial.begin(115200, RAK_CUSTOM_MODE);
+	// Serial.begin(115200, RAK_AT_MODE);
 
 	time_t serial_timeout = millis();
 	// On nRF52840 the USB serial is not available immediately
@@ -299,6 +296,10 @@ void sensor_handler(void *)
 	MYLOG("SENS", "Start");
 	digitalWrite(LED_BLUE, HIGH);
 
+	// Reset trigger time
+	last_trigger = millis();
+
+	// Check if the node has joined the network
 	if (!api.lorawan.njs.get())
 	{
 		MYLOG("UPLINK", "Not joined, skip sending");
@@ -325,7 +326,6 @@ void sensor_handler(void *)
 		rak1921_add_line(disp_line);
 	}
 
-	rak1921_add_line("Joined NW");
 	if (api.lorawan.send(g_solution_data.getSize(), g_solution_data.getBuffer(), 2, true, 1))
 	{
 		MYLOG("UPLINK", "Packet enqueued");

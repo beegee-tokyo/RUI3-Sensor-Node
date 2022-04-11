@@ -20,28 +20,28 @@ sensors_t found_sensors[] = {
 	// I2C address , I2C bus, found?
 	{0x18, 0, false}, //  0 ✔ RAK1904 accelerometer
 	{0x44, 0, false}, //  1 ✔ RAK1903 light sensor
-	{0x42, 0, false}, //  2 ✔ RAK12500 GNSS sensor
+	{0x42, 0, false}, //  2 RAK12500 GNSS sensor
 	{0x5c, 0, false}, //  3 ✔ RAK1902 barometric pressure sensor
 	{0x70, 0, false}, //  4 ✔ RAK1901 temperature & humidity sensor
 	{0x76, 0, false}, //  5 ✔ RAK1906 environment sensor
-	{0x20, 0, false}, //  6 ✔ RAK12035 soil moisture sensor !! address conflict with RAK13003
+	{0x20, 0, false}, //  6 RAK12035 soil moisture sensor !! address conflict with RAK13003
 	{0x10, 0, false}, //  7 ✔ RAK12010 light sensor
-	{0x51, 0, false}, //  8 ✔ RAK12004 MQ2 CO2 gas sensor
-	{0x50, 0, false}, //  9 ✔ RAK12008 MG812 CO2 gas sensor
-	{0x55, 0, false}, // 10 ✔ RAK12009 MQ3 Alcohol gas sensor
-	{0x52, 0, false}, // 11 ✔ RAK12014 Laser ToF sensor !! address conflict with RAK12002
-	{0x52, 0, false}, // 12 ✔ RAK12002 RTC module address !! conflict with RAK12014
-	{0x04, 0, false}, // 13 ✔ RAK14003 LED bargraph module
+	{0x51, 0, false}, //  8 RAK12004 MQ2 CO2 gas sensor
+	{0x50, 0, false}, //  9 RAK12008 MG812 CO2 gas sensor
+	{0x55, 0, false}, // 10 RAK12009 MQ3 Alcohol gas sensor
+	{0x52, 0, false}, // 11 RAK12014 Laser ToF sensor !! address conflict with RAK12002
+	{0x52, 0, false}, // 12 RAK12002 RTC module address !! conflict with RAK12014
+	{0x04, 0, false}, // 13 RAK14003 LED bargraph module
 	{0x59, 0, false}, // 14 ✔ RAK12047 VOC sensor address !! conflict with RAK13600, RAK13003
-	{0x68, 0, false}, // 15 ✔ RAK12025 Gyroscope address !! conflict with RAK1905
-	{0x73, 0, false}, // 16 ✔ RAK14008 Gesture sensor
+	{0x68, 0, false}, // 15 RAK12025 Gyroscope address !! conflict with RAK1905
+	{0x73, 0, false}, // 16 RAK14008 Gesture sensor
 	{0x3C, 0, false}, // 17 ✔ RAK1921 OLED display
-	{0x53, 0, false}, // 18 ✔ RAK12019 LTR390 light sensor
-	{0x28, 0, false}, // 19 ✔ RAK14002 Touch Button module
-	{0x41, 0, false}, // 20 ✔ RAK16000 DC current sensor
+	{0x53, 0, false}, // 18 RAK12019 LTR390 light sensor
+	{0x28, 0, false}, // 19 RAK14002 Touch Button module
+	{0x41, 0, false}, // 20 RAK16000 DC current sensor
 	{0x68, 0, false}, // 21 ✔ RAK1905 MPU9250 9DOF sensor !! address conflict with RAK12025
 	{0x61, 0, false}, // 22 ✔ RAK12037 CO2 sensor !! address conflict with RAK16001
-	{0x3A, 0, false}, // 23 ✔ RAK12003 IR temperature sensor
+	{0x3A, 0, false}, // 23 RAK12003 IR temperature sensor
 	{0x57, 0, false}, // 24 RAK12012 MAX30102 heart rate sensor
 	{0x54, 0, false}, // 25 RAK12016 Flex sensor
 	{0x47, 0, false}, // 26 RAK13004 PWM expander module
@@ -157,6 +157,30 @@ void find_modules(void)
 		}
 	}
 
+	if (found_sensors[ACC_ID].found_sensor)
+	{
+		if (!init_rak1904())
+		{
+			found_sensors[LIGHT_ID].found_sensor = false;
+		}
+	}
+
+	if (found_sensors[GYRO_ID].found_sensor)
+	{
+		// if (!init_rak12025())
+		{
+			found_sensors[GYRO_ID].found_sensor = false;
+			if (!init_rak1905())
+			{
+				found_sensors[MPU_ID].found_sensor = false;
+			}
+			else
+			{
+				found_sensors[MPU_ID].found_sensor = true;
+			}
+		}
+	}
+
 	if (found_sensors[ENV_ID].found_sensor)
 	{
 		if (init_rak1906())
@@ -212,6 +236,18 @@ void find_modules(void)
 			found_sensors[CO2_ID].found_sensor = false;
 		}
 	}
+
+	if (found_sensors[VOC_ID].found_sensor)
+	{
+		if (init_rak12047())
+		{
+			snprintf(g_dev_name, 9, "RAK_VOC");
+		}
+		else
+		{
+			found_sensors[VOC_ID].found_sensor = false;
+		}
+	}
 }
 
 /**
@@ -239,6 +275,20 @@ void announce_modules(void)
 		MYLOG("MOD", "+EVT:RAK1903 OK");
 		// Reading sensor data
 		read_rak1903();
+	}
+
+	if (found_sensors[ACC_ID].found_sensor)
+	{
+		MYLOG("MOD", "+EVT:RAK1904 OK");
+		// Reading sensor data
+		read_rak1904();
+	}
+
+	if (found_sensors[MPU_ID].found_sensor)
+	{
+		MYLOG("MOD", "+EVT:RAK1905 OK");
+		// Reading sensor data
+		read_rak1905();
 	}
 
 	if (found_sensors[ENV_ID].found_sensor)
@@ -270,6 +320,13 @@ void announce_modules(void)
 		// Reading sensor data
 		read_rak12037();
 	}
+
+	if (found_sensors[VOC_ID].found_sensor)
+	{
+		MYLOG("MOD", "+EVT:RAK12047 OK\n");
+		// Sensor needs 100 readings before valid data is available.
+		// Makes no sense to read it already.
+	}
 }
 
 /**
@@ -294,6 +351,18 @@ void get_sensor_values(void)
 	{
 		// Read sensor data
 		read_rak1903();
+	}
+
+	if (found_sensors[ACC_ID].found_sensor)
+	{
+		// Read sensor data
+		read_rak1904();
+	}
+
+	if (found_sensors[MPU_ID].found_sensor)
+	{
+		// Read sensor data
+		read_rak1905();
 	}
 
 	if (found_sensors[ENV_ID].found_sensor)
@@ -321,5 +390,11 @@ void get_sensor_values(void)
 	{
 		// Read sensor data
 		read_rak12037();
+	}
+
+	if (found_sensors[VOC_ID].found_sensor)
+	{
+		// Read sensor data
+		read_rak12047();
 	}
 }
