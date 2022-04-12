@@ -99,7 +99,7 @@ void find_modules(void)
 		error = Wire1.endTransmission();
 		if (error == 0)
 		{
-			// MYLOG("SCAN", "Found sensor at I2C2 %02X", address);
+			MYLOG("SCAN", "Found sensor at I2C2 %02X", address);
 			for (uint8_t i = 0; i < sizeof(found_sensors) / sizeof(sensors_t); i++)
 			{
 				if (address == found_sensors[i].i2c_addr)
@@ -129,6 +129,13 @@ void find_modules(void)
 	}
 
 	// Initialize the modules found
+
+	// Check first if RAK15001 is available
+	if (init_rak15001())
+	{
+		MYLOG("SCAN", "RAK15001 found");
+	}
+
 	if (found_sensors[TEMP_ID].found_sensor)
 	{
 		if (!init_rak1901())
@@ -173,6 +180,14 @@ void find_modules(void)
 			if (!init_rak1905())
 			{
 				found_sensors[MPU_ID].found_sensor = false;
+				if (!init_rak12040())
+				{
+					found_sensors[MPU_ID].found_sensor = false;
+				}
+				else
+				{
+					found_sensors[TEMP_ARR_ID].found_sensor = true;
+				}
 			}
 			else
 			{
@@ -321,6 +336,12 @@ void announce_modules(void)
 		read_rak12037();
 	}
 
+	if (found_sensors[TEMP_ARR_ID].found_sensor)
+	{
+		MYLOG("MOD", "+EVT:RAK12040 OK\n");
+		read_rak12040();
+	}
+
 	if (found_sensors[VOC_ID].found_sensor)
 	{
 		MYLOG("MOD", "+EVT:RAK12047 OK\n");
@@ -390,6 +411,12 @@ void get_sensor_values(void)
 	{
 		// Read sensor data
 		read_rak12037();
+	}
+
+	if (found_sensors[TEMP_ARR_ID].found_sensor)
+	{
+		// Get the temp array sensor values
+		read_rak12040();
 	}
 
 	if (found_sensors[VOC_ID].found_sensor)

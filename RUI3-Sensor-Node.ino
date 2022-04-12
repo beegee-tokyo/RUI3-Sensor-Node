@@ -255,7 +255,7 @@ void setup()
 
 	MYLOG("SETUP", "Set the transmit power %s", api.lorawan.txp.set(0) ? "Success" : "Fail");
 
-	MYLOG("SETUP", "Set the region EU868 %s", api.lorawan.band.set(RAK_REGION_EU868) ? "Success" : "Fail");
+	MYLOG("SETUP", "Set the region US915 %s", api.lorawan.band.set(RAK_REGION_US915) ? "Success" : "Fail");
 
 	MYLOG("SETUP", "Set the network join mode %s", api.lorawan.njm.set(RAK_LORA_OTAA) ? "Success" : "Fail");
 

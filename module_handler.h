@@ -53,6 +53,7 @@ extern sensors_t found_sensors[];
 #define MPU_ID 21	  // RAK1905 9DOF sensor
 #define CO2_ID 22	  // RAK12037 CO2 sensor
 #define FIR_ID 23	  // RAK12003 FIR temperature sensor
+#define TEMP_ARR_ID 24 // RAK12040 Temp Array sensor
 
 // LoRaWAN stuff
 #include "wisblock_cayenne.h"
@@ -129,8 +130,13 @@ bool init_rak12010(void);
 void read_rak12010(void);
 bool init_rak12037(void);
 void read_rak12037(void);
+bool init_rak12040(void);
+void read_rak12040(void);
 bool init_rak12047(void);
 void read_rak12047(void);
+bool init_rak15001(void);
+bool read_rak15001(uint16_t address, uint8_t *buffer, uint16_t size);
+bool write_rak15001(uint16_t address, uint8_t *buffer, uint16_t size);
 
 // Sensor global definitions
 extern float mean_seal_level_press;
