@@ -20,7 +20,7 @@ sensors_t found_sensors[] = {
 	// I2C address , I2C bus, found?
 	{0x18, 0, false}, //  0 ✔ RAK1904 accelerometer
 	{0x44, 0, false}, //  1 ✔ RAK1903 light sensor
-	{0x42, 0, false}, //  2 RAK12500 GNSS sensor
+	{0x42, 0, false}, //  2 ✔ RAK12500 GNSS sensor
 	{0x5c, 0, false}, //  3 ✔ RAK1902 barometric pressure sensor
 	{0x70, 0, false}, //  4 ✔ RAK1901 temperature & humidity sensor
 	{0x76, 0, false}, //  5 ✔ RAK1906 environment sensor
@@ -91,33 +91,33 @@ void find_modules(void)
 		}
 	}
 #if WIRE_INTERFACES_COUNT > 1
-	Wire1.begin();
-	Wire1.setClock(400000);
-	for (byte address = 1; address < 127; address++)
-	{
-		Wire1.beginTransmission(address);
-		error = Wire1.endTransmission();
-		if (error == 0)
-		{
-			MYLOG("SCAN", "Found sensor at I2C2 %02X", address);
-			for (uint8_t i = 0; i < sizeof(found_sensors) / sizeof(sensors_t); i++)
-			{
-				if (address == found_sensors[i].i2c_addr)
-				{
-					found_sensors[i].i2c_num = 2;
-					found_sensors[i].found_sensor = true;
+	// Wire1.begin();
+	// Wire1.setClock(400000);
+	// for (byte address = 1; address < 127; address++)
+	// {
+	// 	Wire1.beginTransmission(address);
+	// 	error = Wire1.endTransmission();
+	// 	if (error == 0)
+	// 	{
+	// 		MYLOG("SCAN", "Found sensor at I2C2 %02X", address);
+	// 		for (uint8_t i = 0; i < sizeof(found_sensors) / sizeof(sensors_t); i++)
+	// 		{
+	// 			if (address == found_sensors[i].i2c_addr)
+	// 			{
+	// 				found_sensors[i].i2c_num = 2;
+	// 				found_sensors[i].found_sensor = true;
 
-					if (address == 0x52)
-					{
-						found_sensors[i + 1].i2c_num = 1;
-						found_sensors[i + 1].found_sensor = true;
-					}
-					break;
-				}
-			}
-			num_dev++;
-		}
-	}
+	// 				if (address == 0x52)
+	// 				{
+	// 					found_sensors[i + 1].i2c_num = 1;
+	// 					found_sensors[i + 1].found_sensor = true;
+	// 				}
+	// 				break;
+	// 			}
+	// 		}
+	// 		num_dev++;
+	// 	}
+	// }
 #endif
 	MYLOG("SCAN", "Found %d sensors", num_dev);
 	for (uint8_t i = 0; i < sizeof(found_sensors) / sizeof(sensors_t); i++)
@@ -256,13 +256,25 @@ void find_modules(void)
 	{
 		if (init_rak12047())
 		{
-			snprintf(g_dev_name, 9, "RAK_VOC");
+			snprintf(g_dev_name, 9, "RUI3 VOC Sensor");
 		}
 		else
 		{
 			found_sensors[VOC_ID].found_sensor = false;
 		}
 	}
+
+	// if (found_sensors[GNSS_ID].found_sensor)
+	// {
+	// 	if (init_gnss())
+	// 	{
+	// 		snprintf(g_dev_name, 9, "RUI3 Location Tracker");
+	// 	}
+	// 	else
+	// 	{
+	// 		found_sensors[GNSS_ID].found_sensor = false;
+	// 	}
+	// }
 }
 
 /**
@@ -348,6 +360,13 @@ void announce_modules(void)
 		// Sensor needs 100 readings before valid data is available.
 		// Makes no sense to read it already.
 	}
+
+	// if (found_sensors[GNSS_ID].found_sensor)
+	// {
+	// 	MYLOG("MOD", "+EVT:RAK12500 OK\n");
+	// 	// Sensor needs time to get location.
+	// 	// Makes no sense to read it already.
+	// }
 }
 
 /**
@@ -424,4 +443,10 @@ void get_sensor_values(void)
 		// Read sensor data
 		read_rak12047();
 	}
+
+	// if (found_sensors[GNSS_ID].found_sensor)
+	// {
+	// 	// Read sensor data
+	// 	poll_gnss();
+	// }
 }

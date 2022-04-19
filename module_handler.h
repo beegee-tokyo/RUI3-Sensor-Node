@@ -134,6 +134,8 @@ bool init_rak12040(void);
 void read_rak12040(void);
 bool init_rak12047(void);
 void read_rak12047(void);
+bool init_gnss(void);
+bool poll_gnss(void);
 bool init_rak15001(void);
 bool read_rak15001(uint16_t address, uint8_t *buffer, uint16_t size);
 bool write_rak15001(uint16_t address, uint8_t *buffer, uint16_t size);

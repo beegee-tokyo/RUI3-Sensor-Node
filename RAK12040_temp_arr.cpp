@@ -96,29 +96,4 @@ void read_rak12040()
 		Serial.println();
 	}
 	Serial.println();
-
-	// for (unsigned char i = 0; i < 64; i++)
-	// {
-	// 	if (pixelTable[i] == 0)
-	// 	{
-	// 		Serial.print(".");
-	// 	}
-	// 	else if (pixelTable[i] == 1)
-	// 	{
-	// 		Serial.print("o");
-	// 	}
-	// 	else if (pixelTable[i] == 2)
-	// 	{
-	// 		Serial.print("0");
-	// 	}
-	// 	else if (pixelTable[i] == 3)
-	// 	{
-	// 		Serial.print("O");
-	// 	}
-	// 	Serial.print(" ");
-	// 	if ((i + 1) % 8 == 0)
-	// 	{
-	// 		Serial.println();
-	// 	}
-	// }
 }
