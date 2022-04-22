@@ -16,7 +16,7 @@
  * @brief List of all supported WisBlock modules
  *
  */
-sensors_t found_sensors[] = {
+volatile sensors_t found_sensors[] = {
 	// I2C address , I2C bus, found?
 	{0x18, 0, false}, //  0 ✔ RAK1904 accelerometer
 	{0x44, 0, false}, //  1 ✔ RAK1903 light sensor
@@ -71,7 +71,7 @@ void find_modules(void)
 		error = Wire.endTransmission();
 		if (error == 0)
 		{
-			// MYLOG("SCAN", "Found sensor at I2C1 0x%02X\n", address);
+			MYLOG("SCAN", "Found sensor on I2C1 0x%02X\n", address);
 			for (uint8_t i = 0; i < sizeof(found_sensors) / sizeof(sensors_t); i++)
 			{
 				if (address == found_sensors[i].i2c_addr)
@@ -90,51 +90,37 @@ void find_modules(void)
 			num_dev++;
 		}
 	}
-#if WIRE_INTERFACES_COUNT > 1
-	// Wire1.begin();
-	// Wire1.setClock(400000);
-	// for (byte address = 1; address < 127; address++)
-	// {
-	// 	Wire1.beginTransmission(address);
-	// 	error = Wire1.endTransmission();
-	// 	if (error == 0)
-	// 	{
-	// 		MYLOG("SCAN", "Found sensor at I2C2 %02X", address);
-	// 		for (uint8_t i = 0; i < sizeof(found_sensors) / sizeof(sensors_t); i++)
-	// 		{
-	// 			if (address == found_sensors[i].i2c_addr)
-	// 			{
-	// 				found_sensors[i].i2c_num = 2;
-	// 				found_sensors[i].found_sensor = true;
 
-	// 				if (address == 0x52)
-	// 				{
-	// 					found_sensors[i + 1].i2c_num = 1;
-	// 					found_sensors[i + 1].found_sensor = true;
-	// 				}
-	// 				break;
-	// 			}
-	// 		}
-	// 		num_dev++;
-	// 	}
-	// }
-#endif
 	MYLOG("SCAN", "Found %d sensors", num_dev);
-	for (uint8_t i = 0; i < sizeof(found_sensors) / sizeof(sensors_t); i++)
+
+	if (num_dev == 0)
 	{
-		if (found_sensors[i].found_sensor)
+		for (uint8_t i = 0; i < sizeof(found_sensors) / sizeof(sensors_t); i++)
 		{
-			MYLOG("SCAN", "ID %d addr %02X", i, found_sensors[i].i2c_addr);
+			if (found_sensors[i].found_sensor)
+			{
+				MYLOG("SCAN", "ID %d addr %02X", i, found_sensors[i].i2c_addr);
+			}
 		}
 	}
 
-	// Initialize the modules found
-
-	// Check first if RAK15001 is available
+	// Check if RAK15001 is available
 	if (init_rak15001())
 	{
 		MYLOG("SCAN", "RAK15001 found");
 	}
+
+	// No devices found, no need to go through the initialization routines
+	if (num_dev == 0)
+	{
+		for (uint8_t i = 0; i < sizeof(found_sensors) / sizeof(sensors_t); i++)
+		{
+			found_sensors[i].found_sensor = false;
+		}
+		return;
+	}
+
+	// Initialize the modules found
 
 	if (found_sensors[TEMP_ID].found_sensor)
 	{
@@ -156,7 +142,7 @@ void find_modules(void)
 	{
 		if (init_rak1903())
 		{
-			snprintf(g_dev_name, 63, "RUI3 Weather Station");
+			sprintf(g_dev_name, "RUI3 Weather Station");
 		}
 		else
 		{
@@ -180,14 +166,14 @@ void find_modules(void)
 			if (!init_rak1905())
 			{
 				found_sensors[MPU_ID].found_sensor = false;
-				if (!init_rak12040())
-				{
-					found_sensors[MPU_ID].found_sensor = false;
-				}
-				else
-				{
-					found_sensors[TEMP_ARR_ID].found_sensor = true;
-				}
+				// if (!init_rak12040())
+				// {
+				// 	found_sensors[MPU_ID].found_sensor = false;
+				// }
+				// else
+				// {
+				// 	found_sensors[TEMP_ARR_ID].found_sensor = true;
+				// }
 			}
 			else
 			{
@@ -200,7 +186,7 @@ void find_modules(void)
 	{
 		if (init_rak1906())
 		{
-			snprintf(g_dev_name, 63, "RUI3 Environment Sensor");
+			sprintf(g_dev_name, "RUI3 Environment Sensor");
 		}
 		else
 		{
@@ -220,19 +206,19 @@ void find_modules(void)
 		}
 	}
 
-	if (found_sensors[FIR_ID].found_sensor)
-	{
-		if (!init_rak12003())
-		{
-			found_sensors[FIR_ID].found_sensor = false;
-		}
-	}
+	// if (found_sensors[FIR_ID].found_sensor)
+	// {
+	// 	if (!init_rak12003())
+	// 	{
+	// 		found_sensors[FIR_ID].found_sensor = false;
+	// 	}
+	// }
 
 	if (found_sensors[LIGHT2_ID].found_sensor)
 	{
 		if (init_rak12010())
 		{
-			snprintf(g_dev_name, 63, "RUI3 Weather Station");
+			sprintf(g_dev_name, "RUI3 Weather Station");
 		}
 		else
 		{
@@ -244,7 +230,7 @@ void find_modules(void)
 	{
 		if (init_rak12037())
 		{
-			snprintf(g_dev_name, 9, "RUI3 Environment Sensor");
+			sprintf(g_dev_name, "RUI3 Environment Sensor");
 		}
 		else
 		{
@@ -256,7 +242,7 @@ void find_modules(void)
 	{
 		if (init_rak12047())
 		{
-			snprintf(g_dev_name, 9, "RUI3 VOC Sensor");
+			sprintf(g_dev_name, "RUI3 VOC Sensor");
 		}
 		else
 		{
@@ -268,7 +254,7 @@ void find_modules(void)
 	// {
 	// 	if (init_gnss())
 	// 	{
-	// 		snprintf(g_dev_name, 9, "RUI3 Location Tracker");
+	// 		sprintf(g_dev_name, "RUI3 Location Tracker");
 	// 	}
 	// 	else
 	// 	{
@@ -328,11 +314,11 @@ void announce_modules(void)
 		read_rak1906();
 	}
 
-	if (found_sensors[FIR_ID].found_sensor)
-	{
-		MYLOG("MOD", "+EVT:RAK12003 OK\n");
-		read_rak12003();
-	}
+	// if (found_sensors[FIR_ID].found_sensor)
+	// {
+	// 	MYLOG("MOD", "+EVT:RAK12003 OK\n");
+	// 	read_rak12003();
+	// }
 
 	if (found_sensors[LIGHT2_ID].found_sensor)
 	{
@@ -348,11 +334,11 @@ void announce_modules(void)
 		read_rak12037();
 	}
 
-	if (found_sensors[TEMP_ARR_ID].found_sensor)
-	{
-		MYLOG("MOD", "+EVT:RAK12040 OK\n");
-		read_rak12040();
-	}
+	// if (found_sensors[TEMP_ARR_ID].found_sensor)
+	// {
+	// 	MYLOG("MOD", "+EVT:RAK12040 OK\n");
+	// 	read_rak12040();
+	// }
 
 	if (found_sensors[VOC_ID].found_sensor)
 	{
@@ -414,11 +400,11 @@ void get_sensor_values(void)
 		read_rak1906();
 	}
 
-	if (found_sensors[FIR_ID].found_sensor)
-	{
-		// Read sensor data
-		read_rak12003();
-	}
+	// if (found_sensors[FIR_ID].found_sensor)
+	// {
+	// 	// Read sensor data
+	// 	read_rak12003();
+	// }
 
 	if (found_sensors[LIGHT2_ID].found_sensor)
 	{
@@ -432,11 +418,11 @@ void get_sensor_values(void)
 		read_rak12037();
 	}
 
-	if (found_sensors[TEMP_ARR_ID].found_sensor)
-	{
-		// Get the temp array sensor values
-		read_rak12040();
-	}
+	// if (found_sensors[TEMP_ARR_ID].found_sensor)
+	// {
+	// 	// Get the temp array sensor values
+	// 	read_rak12040();
+	// }
 
 	if (found_sensors[VOC_ID].found_sensor)
 	{

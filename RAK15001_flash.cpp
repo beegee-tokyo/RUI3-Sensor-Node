@@ -46,6 +46,7 @@ bool g_has_rak15001 = false;
 bool init_rak15001(void)
 {
 	MYLOG("FLASH", "SS = %d", SS);
+
 	if (!g_flash.begin(&g_RAK15001)) // Start access to the flash
 	{
 		MYLOG("FLASH", "Flash access failed, check the settings");

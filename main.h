@@ -27,7 +27,8 @@
 			Serial.printf("[%s] ", tag); \
 		Serial.printf(__VA_ARGS__);      \
 		Serial.printf("\n");             \
-	} while (0)
+	} while (0);                         \
+	delay(100)
 #else
 #define MYLOG(...)
 #endif
@@ -91,8 +92,8 @@ struct s_lorawan_settings
 	uint8_t app_port = 2;
 	// Flag to enable confirmed messages
 	bool confirmed_msg_enabled = true;
-	// Fixed LoRaWAN lorawan_region (depends on compiler option)
-	uint8_t lora_region = 5;
+	// Fixed LoRaWAN lorawan_region
+	uint8_t lora_region = 4;
 	// Flag for LoRaWAN or LoRa P2P
 	bool lorawan_enable = true;
 	// Frequency in Hz

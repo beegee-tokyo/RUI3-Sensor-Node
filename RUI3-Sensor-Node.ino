@@ -18,10 +18,11 @@ bool ret;
 WisCayenne g_solution_data(255);
 
 /** Set the device name, max length is 10 characters */
-char g_dev_name[64] = "RUI3 Sensor";
+char g_dev_name[64] = "RUI3 Sensor Node                                              ";
 
 /** Device settings */
 s_lorawan_settings g_lorawan_settings;
+s_lorawan_settings check_settings;
 
 /** OTAA Device EUI MSB */
 uint8_t node_device_eui[8] = {0}; // ac1f09fff8683172
@@ -86,7 +87,7 @@ void setup()
 	digitalWrite(WB_IO2, HIGH);
 
 	Serial.begin(115200, RAK_CUSTOM_MODE);
-	// Serial.begin(115200, RAK_AT_MODE);
+	// Serial.begin(115200);
 
 	time_t serial_timeout = millis();
 	// On nRF52840 the USB serial is not available immediately
@@ -112,11 +113,11 @@ void setup()
 	// Check if credentials are in the Flash module
 	if (g_has_rak15001)
 	{
-		s_lorawan_settings check_settings;
-		if (read_rak15001(0, (uint8_t *)&check_settings, sizeof(s_lorawan_settings)))
+		uint8_t check_buff[2];
+		if (read_rak15001(0, check_buff, 2))
 		{
 			// Check if it is LPWAN settings
-			if ((check_settings.valid_mark_1 != 0xAA) || (check_settings.valid_mark_2 != LORAWAN_DATA_MARKER))
+			if ((check_buff[0] != 0xAA) || (check_buff[1] != LORAWAN_DATA_MARKER))
 			{
 				// Data is not valid, reset to defaults
 				MYLOG("SETUP", "Invalid data set");
@@ -126,15 +127,20 @@ void setup()
 				}
 				else
 				{
-					MYLOG("SETUP", "Set default dataset");
-					log_settings();
+					MYLOG("SETUP", "Write failed. Something is wrong");
+					return;
 				}
 			}
 			else
 			{
 				MYLOG("SETUP", "Found valid dataset");
-				log_settings();
 			}
+			if (read_rak15001(0, (uint8_t *)&g_lorawan_settings, sizeof(s_lorawan_settings)))
+			{
+				MYLOG("SETUP", "Read saved data set");
+			}
+			log_settings();
+			delay(500);
 			if (!api.lorawan.deui.set(g_lorawan_settings.node_device_eui, 8))
 			{
 				MYLOG("SETUP", "LoRaWan OTAA - set device EUI failed!");
@@ -150,7 +156,6 @@ void setup()
 				MYLOG("SETUP", "LoRaWan OTAA - set app key failed!");
 				return;
 			}
-
 		}
 		else
 		{
@@ -291,6 +296,7 @@ void setup()
 				  node_device_eui[4], node_device_eui[5], node_device_eui[6], node_device_eui[7]);
 		}
 	}
+	// log_settings();
 
 	/*************************************
 
@@ -307,9 +313,19 @@ void setup()
 
 	 * ************************************/
 
+	MYLOG("SETUP", "Setting band %d", g_lorawan_settings.lora_region);
+	uint8_t curr_band = (uint8_t)api.lorawan.band.get();
+	MYLOG("SETUP", "Current region %d", curr_band);
+	if (curr_band == g_lorawan_settings.lora_region)
+	{
+		MYLOG("SETUP", "Band is already %d", curr_band);
+	}
+	else
+	{
+		MYLOG("SETUP", "Set the region %s", api.lorawan.band.set(g_lorawan_settings.lora_region) ? "Success" : "Fail");
+	}
+	
 	MYLOG("SETUP", "Set the transmit power %s", api.lorawan.txp.set(g_lorawan_settings.tx_power) ? "Success" : "Fail");
-
-	MYLOG("SETUP", "Set the region %s", api.lorawan.band.set(g_lorawan_settings.lora_region) ? "Success" : "Fail");
 
 	uint16_t maskBuff = 0x0001; // << (g_lorawan_settings.subband_channels - 1);
 	MYLOG("SETUP", "Set the channel mask %s", api.lorawan.mask.set(&maskBuff) ? "Success" : "Fail");
@@ -345,7 +361,7 @@ void setup()
 	while (api.lorawan.njs.get() == 0)
 	{
 		api.lorawan.join();
-		delay(5000);
+		delay(10000);
 	}
 
 	// Show found modules
@@ -384,7 +400,7 @@ void sensor_handler(void *)
 	// Send packet
 	g_solution_data.addVoltage(LPP_CHANNEL_BATT, api.system.bat.get());
 
-	MYLOG("UPLINK", "Send packet at %ld", millis() / 1000);
+	MYLOG("UPLINK", "Send packet with size %d", g_solution_data.getSize());
 
 	if (found_sensors[OLED_ID].found_sensor)
 	{

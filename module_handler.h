@@ -26,7 +26,7 @@ typedef struct sensors_s
 	bool found_sensor; // Flag if sensor is present
 } sensors_t;
 
-extern sensors_t found_sensors[];
+extern volatile sensors_t found_sensors[];
 
 // Index for known I2C devices
 #define ACC_ID 0	  // RAK1904 accelerometer
