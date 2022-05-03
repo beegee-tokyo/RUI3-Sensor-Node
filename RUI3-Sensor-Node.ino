@@ -86,8 +86,8 @@ void setup()
 	pinMode(WB_IO2, OUTPUT);
 	digitalWrite(WB_IO2, HIGH);
 
-	Serial.begin(115200, RAK_CUSTOM_MODE);
-	// Serial.begin(115200);
+	// Serial.begin(115200, RAK_CUSTOM_MODE);
+	Serial.begin(115200);
 
 	time_t serial_timeout = millis();
 	// On nRF52840 the USB serial is not available immediately
@@ -110,37 +110,19 @@ void setup()
 	MYLOG("SETUP", "RAKwireless %s Node", g_dev_name);
 	MYLOG("SETUP", "------------------------------------------------------");
 
+	/*************************************
+
+	This code part is an option to use the RAK15001 Flash Module to store the credentials.
+	It is for testing and not fully functional.
+	Credentials sent with AT commands are not automatically stored in the Flash.
+
+	*************************************/
 	// Check if credentials are in the Flash module
 	if (g_has_rak15001)
 	{
-		uint8_t check_buff[2];
-		if (read_rak15001(0, check_buff, 2))
+		// Try to get configuration from Flash
+		if (read_config())
 		{
-			// Check if it is LPWAN settings
-			if ((check_buff[0] != 0xAA) || (check_buff[1] != LORAWAN_DATA_MARKER))
-			{
-				// Data is not valid, reset to defaults
-				MYLOG("SETUP", "Invalid data set");
-				if (write_rak15001(0, (uint8_t *)&g_lorawan_settings, sizeof(s_lorawan_settings)))
-				{
-					MYLOG("SETUP", "Wrote default data set");
-				}
-				else
-				{
-					MYLOG("SETUP", "Write failed. Something is wrong");
-					return;
-				}
-			}
-			else
-			{
-				MYLOG("SETUP", "Found valid dataset");
-			}
-			if (read_rak15001(0, (uint8_t *)&g_lorawan_settings, sizeof(s_lorawan_settings)))
-			{
-				MYLOG("SETUP", "Read saved data set");
-			}
-			log_settings();
-			delay(500);
 			if (!api.lorawan.deui.set(g_lorawan_settings.node_device_eui, 8))
 			{
 				MYLOG("SETUP", "LoRaWan OTAA - set device EUI failed!");
@@ -156,11 +138,6 @@ void setup()
 				MYLOG("SETUP", "LoRaWan OTAA - set app key failed!");
 				return;
 			}
-		}
-		else
-		{
-			MYLOG("SETUP", "Reading from RAK15001 failed");
-			g_has_rak15001 = false;
 		}
 	}
 	else
@@ -180,20 +157,12 @@ void setup()
 				creds_ok = true;
 			}
 		}
-		// else
+
 		if (!creds_ok)
 		{
 			MYLOG("SETUP", "LoRaWan OTAA - set application EUI!"); //
-			node_app_eui[0] = 0xac;
-			node_app_eui[1] = 0x1f;
-			node_app_eui[2] = 0x09;
-			node_app_eui[3] = 0xff;
-			node_app_eui[4] = 0xf8;
-			node_app_eui[5] = 0x68;
-			node_app_eui[6] = 0x31;
-			node_app_eui[7] = 0x72;
 
-			if (!api.lorawan.appeui.set(node_app_eui, 8))
+			if (!api.lorawan.appeui.set(g_lorawan_settings.node_app_eui, 8))
 			{
 				MYLOG("SETUP", "LoRaWan OTAA - set app EUI failed!");
 				return;
@@ -222,27 +191,11 @@ void setup()
 				creds_ok = true;
 			}
 		}
-		// else
+
 		if (!creds_ok)
 		{
 			MYLOG("SETUP", "LoRaWan OTAA - set application key!"); //
-			node_app_key[0] = 0xef;
-			node_app_key[1] = 0xad;
-			node_app_key[2] = 0xff;
-			node_app_key[3] = 0x29;
-			node_app_key[4] = 0xc7;
-			node_app_key[5] = 0x7b;
-			node_app_key[6] = 0x48;
-			node_app_key[7] = 0x29;
-			node_app_key[8] = 0xac;
-			node_app_key[9] = 0xf7;
-			node_app_key[10] = 0x1e;
-			node_app_key[11] = 0x1a;
-			node_app_key[12] = 0x6e;
-			node_app_key[13] = 0x76;
-			node_app_key[14] = 0xf7;
-			node_app_key[15] = 0x13;
-			if (!api.lorawan.appkey.set(node_app_key, 16))
+			if (!api.lorawan.appkey.set(g_lorawan_settings.node_app_key, 16))
 			{
 				MYLOG("SETUP", "LoRaWan OTAA - set application key failed!");
 				return;
@@ -271,19 +224,11 @@ void setup()
 				creds_ok = true;
 			}
 		}
-		// else
+
 		if (!creds_ok)
 		{
 			MYLOG("SETUP", "LoRaWan OTAA - set device EUI!"); //
-			node_device_eui[0] = 0xac;
-			node_device_eui[1] = 0x1f;
-			node_device_eui[2] = 0x09;
-			node_device_eui[3] = 0xff;
-			node_device_eui[4] = 0xf8;
-			node_device_eui[5] = 0x68;
-			node_device_eui[6] = 0x31;
-			node_device_eui[7] = 0x72;
-			if (!api.lorawan.deui.set(node_device_eui, 8))
+			if (!api.lorawan.deui.set(g_lorawan_settings.node_device_eui, 8))
 			{
 				MYLOG("SETUP", "LoRaWan OTAA - set device EUI failed! \r\n");
 				return;
@@ -300,19 +245,20 @@ void setup()
 
 	/*************************************
 
-	   LoRaWAN band setting:
-		 EU433: 0
-		 CN470: 1
-		 RU864: 2
-		 IN865: 3
-		 EU868: 4
-		 US915: 5
-		 AU915: 6
-		 KR920: 7
-		 AS923: 8
+	LoRaWAN band setting:
+	RAK_REGION_EU433
+	RAK_REGION_CN470
+	RAK_REGION_RU864
+	RAK_REGION_IN865
+	RAK_REGION_EU868
+	RAK_REGION_US915
+	RAK_REGION_AU915
+	RAK_REGION_KR920
+	RAK_REGION_AS923
 
-	 * ************************************/
+	*************************************/
 
+	// Set region
 	MYLOG("SETUP", "Setting band %d", g_lorawan_settings.lora_region);
 	uint8_t curr_band = (uint8_t)api.lorawan.band.get();
 	MYLOG("SETUP", "Current region %d", curr_band);
@@ -324,17 +270,33 @@ void setup()
 	{
 		MYLOG("SETUP", "Set the region %s", api.lorawan.band.set(g_lorawan_settings.lora_region) ? "Success" : "Fail");
 	}
-	
+
 	MYLOG("SETUP", "Set the transmit power %s", api.lorawan.txp.set(g_lorawan_settings.tx_power) ? "Success" : "Fail");
 
-	uint16_t maskBuff = 0x0001; // << (g_lorawan_settings.subband_channels - 1);
-	MYLOG("SETUP", "Set the channel mask %s", api.lorawan.mask.set(&maskBuff) ? "Success" : "Fail");
-	maskBuff = 0x0000;
-	api.lorawan.mask.get(&maskBuff);
-	MYLOG("SETUP", "Channel mask 0x%04X", maskBuff);
+	// Set subband (only US915, AU195 and CN470)
+	if ((g_lorawan_settings.lora_region == RAK_REGION_US915) || (g_lorawan_settings.lora_region == RAK_REGION_AU915) || (g_lorawan_settings.lora_region == RAK_REGION_CN470))
+	{
+		uint16_t maskBuff = 0x0001 << (g_lorawan_settings.subband_channels - 1);
+		MYLOG("SETUP", "Set the channel mask %s", api.lorawan.mask.set(&maskBuff) ? "Success" : "Fail");
+		maskBuff = 0x0000;
+		api.lorawan.mask.get(&maskBuff);
+		MYLOG("SETUP", "Channel mask is set to 0x%04X", maskBuff);
+	}
 
+	// Set the network join mode
 	MYLOG("SETUP", "Set the network join mode %s", api.lorawan.njm.set(g_lorawan_settings.otaa_enabled) ? "Success" : "Fail");
 
+	// Set packet mode (confirmed/unconfirmed)
+	if (g_lorawan_settings.confirmed_msg_enabled)
+	{
+		MYLOG("SETUP", "Set confirmed packets  %s", api.lorawan.cfm.set(0) ? "Success" : "Fail");
+	}
+	else
+	{
+		MYLOG("SETUP", "Set unconfirmed packets  %s", api.lorawan.cfm.set(1) ? "Success" : "Fail");
+	}
+
+	// Start the join process
 	if (!(ret = api.lorawan.join()))
 	{
 		MYLOG("SETUP", "LoRaWan OTAA - join fail! \r\n");
@@ -342,12 +304,7 @@ void setup()
 	}
 	digitalWrite(LED_GREEN, LOW);
 
-	MYLOG("SETUP", "Set the data rate  %s", api.lorawan.dr.set(g_lorawan_settings.data_rate) ? "Success" : "Fail");
-
-	MYLOG("SETUP", "Disable duty cycle  %s", api.lorawan.dcs.set(g_lorawan_settings.duty_cycle_enabled ? 1 : 0) ? "Success" : "Fail");
-
-	MYLOG("SETUP", "Enable confirmed packets  %s", api.lorawan.cfm.set(g_lorawan_settings.confirmed_msg_enabled) ? "Success" : "Fail");
-
+	// Setup the callbacks for joined and send finished
 	api.lorawan.registerSendCallback(sendCallback);
 	api.lorawan.registerJoinCallback(joinCallback);
 
@@ -369,17 +326,16 @@ void setup()
 	digitalWrite(LED_BLUE, LOW);
 }
 
+/**
+ * @brief sensor_handler is a timer function called every
+ * RAK_SENSOR_PERIOD milliseconds. Default is 120000. Can be
+ * changed in main.h
+ *
+ */
 void sensor_handler(void *)
 {
 	MYLOG("SENS", "Start");
 	digitalWrite(LED_BLUE, HIGH);
-
-	if (api.lorawan.deui.get(node_device_eui, 8))
-	{
-		MYLOG("SETUP", "Got DevEUI %02X%02X%02X%02X%02X%02X%02X%02X",
-			  node_device_eui[0], node_device_eui[1], node_device_eui[2], node_device_eui[3],
-			  node_device_eui[4], node_device_eui[5], node_device_eui[6], node_device_eui[7]);
-	}
 
 	// Reset trigger time
 	last_trigger = millis();
@@ -397,11 +353,12 @@ void sensor_handler(void *)
 	// Read sensor data
 	get_sensor_values();
 
-	// Send packet
+	// Add battery voltage
 	g_solution_data.addVoltage(LPP_CHANNEL_BATT, api.system.bat.get());
 
 	MYLOG("UPLINK", "Send packet with size %d", g_solution_data.getSize());
 
+	// If RAK1921 OLED is available, show some information on the display
 	if (found_sensors[OLED_ID].found_sensor)
 	{
 		char disp_line[254];
@@ -411,7 +368,8 @@ void sensor_handler(void *)
 		rak1921_add_line(disp_line);
 	}
 
-	if (api.lorawan.send(g_solution_data.getSize(), g_solution_data.getBuffer(), 2, true, 1))
+	// Send the packet
+	if (api.lorawan.send(g_solution_data.getSize(), g_solution_data.getBuffer(), 2, g_lorawan_settings.confirmed_msg_enabled, 1))
 	{
 		MYLOG("UPLINK", "Packet enqueued");
 	}
@@ -421,14 +379,13 @@ void sensor_handler(void *)
 	}
 }
 
+/**
+ * @brief This example is complete timer
+ * driven. The loop() does nothing than
+ * sleep.
+ *
+ */
 void loop()
 {
 	api.system.sleep.all();
-	// if (Serial.available())
-	// {
-	// 	char ser_buff[256];
-	// 	size_t ser_rcvd = 0;
-	// 	Serial.readBytesUntil('\n', ser_buff, ser_rcvd);
-	// 	Serial.printf("Ser RX: %s", ser_buff);
-	// }
 }

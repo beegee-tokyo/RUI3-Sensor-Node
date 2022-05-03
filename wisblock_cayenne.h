@@ -16,7 +16,7 @@
 #include <CayenneLPP.h>
 
 #define LPP_GPS4 136 // 3 byte lon/lat 0.0001 °, 3 bytes alt 0.01 meter (Cayenne LPP default)
-#define LPP_GPS6 137 // 4 byte lon/lat 0.000001 °, 3 bytes alt 0.01 meter (Customized Cayenne LPP)
+#define LPP_GPS6 137 // 4 byte lon/lat 0.000001 °, 3 bytes alt 0.01 meter (Customized Cayenne LPP, higher precision)
 #define LPP_VOC 138	 // 2 byte VOC index
 
 // Only Data Size

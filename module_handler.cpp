@@ -41,7 +41,8 @@ volatile sensors_t found_sensors[] = {
 	{0x41, 0, false}, // 20 RAK16000 DC current sensor
 	{0x68, 0, false}, // 21 ✔ RAK1905 MPU9250 9DOF sensor !! address conflict with RAK12025
 	{0x61, 0, false}, // 22 ✔ RAK12037 CO2 sensor !! address conflict with RAK16001
-	{0x3A, 0, false}, // 23 RAK12003 IR temperature sensor
+	{0x3A, 0, false}, // 23 ✔ RAK12003 IR temperature sensor
+	{0x68, 0, false}, // 24 ✔ RAK12040 AMG8833 temperature array sensor
 	{0x57, 0, false}, // 24 RAK12012 MAX30102 heart rate sensor
 	{0x54, 0, false}, // 25 RAK12016 Flex sensor
 	{0x47, 0, false}, // 26 RAK13004 PWM expander module
@@ -166,14 +167,14 @@ void find_modules(void)
 			if (!init_rak1905())
 			{
 				found_sensors[MPU_ID].found_sensor = false;
-				// if (!init_rak12040())
-				// {
-				// 	found_sensors[MPU_ID].found_sensor = false;
-				// }
-				// else
-				// {
-				// 	found_sensors[TEMP_ARR_ID].found_sensor = true;
-				// }
+				if (!init_rak12040())
+				{
+					found_sensors[MPU_ID].found_sensor = false;
+				}
+				else
+				{
+					found_sensors[TEMP_ARR_ID].found_sensor = true;
+				}
 			}
 			else
 			{
@@ -206,13 +207,13 @@ void find_modules(void)
 		}
 	}
 
-	// if (found_sensors[FIR_ID].found_sensor)
-	// {
-	// 	if (!init_rak12003())
-	// 	{
-	// 		found_sensors[FIR_ID].found_sensor = false;
-	// 	}
-	// }
+	if (found_sensors[FIR_ID].found_sensor)
+	{
+		if (!init_rak12003())
+		{
+			found_sensors[FIR_ID].found_sensor = false;
+		}
+	}
 
 	if (found_sensors[LIGHT2_ID].found_sensor)
 	{
@@ -314,11 +315,11 @@ void announce_modules(void)
 		read_rak1906();
 	}
 
-	// if (found_sensors[FIR_ID].found_sensor)
-	// {
-	// 	MYLOG("MOD", "+EVT:RAK12003 OK\n");
-	// 	read_rak12003();
-	// }
+	if (found_sensors[FIR_ID].found_sensor)
+	{
+		MYLOG("MOD", "+EVT:RAK12003 OK\n");
+		read_rak12003();
+	}
 
 	if (found_sensors[LIGHT2_ID].found_sensor)
 	{
@@ -334,11 +335,11 @@ void announce_modules(void)
 		read_rak12037();
 	}
 
-	// if (found_sensors[TEMP_ARR_ID].found_sensor)
-	// {
-	// 	MYLOG("MOD", "+EVT:RAK12040 OK\n");
-	// 	read_rak12040();
-	// }
+	if (found_sensors[TEMP_ARR_ID].found_sensor)
+	{
+		MYLOG("MOD", "+EVT:RAK12040 OK\n");
+		read_rak12040();
+	}
 
 	if (found_sensors[VOC_ID].found_sensor)
 	{
@@ -400,11 +401,11 @@ void get_sensor_values(void)
 		read_rak1906();
 	}
 
-	// if (found_sensors[FIR_ID].found_sensor)
-	// {
-	// 	// Read sensor data
-	// 	read_rak12003();
-	// }
+	if (found_sensors[FIR_ID].found_sensor)
+	{
+		// Read sensor data
+		read_rak12003();
+	}
 
 	if (found_sensors[LIGHT2_ID].found_sensor)
 	{
@@ -418,11 +419,11 @@ void get_sensor_values(void)
 		read_rak12037();
 	}
 
-	// if (found_sensors[TEMP_ARR_ID].found_sensor)
-	// {
-	// 	// Get the temp array sensor values
-	// 	read_rak12040();
-	// }
+	if (found_sensors[TEMP_ARR_ID].found_sensor)
+	{
+		// Get the temp array sensor values
+		read_rak12040();
+	}
 
 	if (found_sensors[VOC_ID].found_sensor)
 	{

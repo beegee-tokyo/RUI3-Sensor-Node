@@ -29,30 +29,30 @@ typedef struct sensors_s
 extern volatile sensors_t found_sensors[];
 
 // Index for known I2C devices
-#define ACC_ID 0	  // RAK1904 accelerometer
-#define LIGHT_ID 1	  // RAK1903 light sensor
-#define GNSS_ID 2	  // RAK12500 GNSS sensor
-#define PRESS_ID 3	  // RAK1902 barometric pressure sensor
-#define TEMP_ID 4	  // RAK1901 temperature & humidity sensor
-#define ENV_ID 5	  // RAK1906 environment sensor
-#define SOIL_ID 6	  // RAK12035 soil moisture sensor
-#define LIGHT2_ID 7	  // RAK12010 light sensor
-#define MQ2_ID 8	  // RAK12004 MQ2 CO2 gas sensor
-#define MG812_ID 9	  // RAK12008 MG812 CO2 gas sensor
-#define MQ3_ID 10	  // RAK12009 MQ3 Alcohol gas sensor
-#define TOF_ID 11	  // RAK12014 Laser ToF sensor
-#define RTC_ID 12	  // RAK12002 RTC module
-#define BAR_ID 13	  // RAK14003 LED bargraph module
-#define VOC_ID 14	  // RAK12047 VOC sensor
-#define GYRO_ID 15	  // RAK12025 Gyroscope
-#define GESTURE_ID 16 // RAK14008 Gesture sensor
-#define OLED_ID 17	  // RAK1921 OLED display
-#define UVL_ID 18	  // RAK12019 UV light sensor
-#define TOUCH_ID 19	  // RAK14002 Touch Pad
-#define CURRENT_ID 20 // RAK16000 current sensor
-#define MPU_ID 21	  // RAK1905 9DOF sensor
-#define CO2_ID 22	  // RAK12037 CO2 sensor
-#define FIR_ID 23	  // RAK12003 FIR temperature sensor
+#define ACC_ID 0	   // RAK1904 accelerometer
+#define LIGHT_ID 1	   // RAK1903 light sensor
+#define GNSS_ID 2	   // RAK12500 GNSS sensor
+#define PRESS_ID 3	   // RAK1902 barometric pressure sensor
+#define TEMP_ID 4	   // RAK1901 temperature & humidity sensor
+#define ENV_ID 5	   // RAK1906 environment sensor
+#define SOIL_ID 6	   // RAK12035 soil moisture sensor
+#define LIGHT2_ID 7	   // RAK12010 light sensor
+#define MQ2_ID 8	   // RAK12004 MQ2 CO2 gas sensor
+#define MG812_ID 9	   // RAK12008 MG812 CO2 gas sensor
+#define MQ3_ID 10	   // RAK12009 MQ3 Alcohol gas sensor
+#define TOF_ID 11	   // RAK12014 Laser ToF sensor
+#define RTC_ID 12	   // RAK12002 RTC module
+#define BAR_ID 13	   // RAK14003 LED bargraph module
+#define VOC_ID 14	   // RAK12047 VOC sensor
+#define GYRO_ID 15	   // RAK12025 Gyroscope
+#define GESTURE_ID 16  // RAK14008 Gesture sensor
+#define OLED_ID 17	   // RAK1921 OLED display
+#define UVL_ID 18	   // RAK12019 UV light sensor
+#define TOUCH_ID 19	   // RAK14002 Touch Pad
+#define CURRENT_ID 20  // RAK16000 current sensor
+#define MPU_ID 21	   // RAK1905 9DOF sensor
+#define CO2_ID 22	   // RAK12037 CO2 sensor
+#define FIR_ID 23	   // RAK12003 FIR temperature sensor
 #define TEMP_ARR_ID 24 // RAK12040 Temp Array sensor
 
 // LoRaWAN stuff
@@ -139,6 +139,7 @@ bool poll_gnss(void);
 bool init_rak15001(void);
 bool read_rak15001(uint16_t address, uint8_t *buffer, uint16_t size);
 bool write_rak15001(uint16_t address, uint8_t *buffer, uint16_t size);
+bool read_config(void);
 
 // Sensor global definitions
 extern float mean_seal_level_press;

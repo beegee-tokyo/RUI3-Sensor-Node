@@ -154,16 +154,68 @@ bool write_rak15001(uint16_t sector, uint8_t *buffer, uint16_t size)
 
 /**
  * @brief Save the device configuration to the RAK15001
- *
+ * 
+ * @return true if save was successful
+ * @return false if save failed
  */
-void save_config(void)
+bool save_config(void)
 {
+	if (write_rak15001(0, (uint8_t *)&g_lorawan_settings, sizeof(s_lorawan_settings)))
+	{
+		MYLOG("FLASH", "Wrote default data set");
+	}
+	else
+	{
+		MYLOG("FLASH", "Write failed. Something is wrong");
+		return false;
+	}
+	return true;
+}
 
-#ifdef _VARIANT_RAK4630_
-#elif defined(_VARIANT_RAK3172_) || (_VARIANT_RAK3172_SIP_)
-#elif
-#error
-#endif
+/**
+ * @brief Check if a RAK15001 is available
+ * and if a configuration is saved in the Flash
+ *
+ * @return true if configuration was found
+ * @return false if either RAK15001 was not found or the configuration is invalid
+ */
+bool read_config(void)
+{
+	uint8_t check_buff[2];
+	if (read_rak15001(0, check_buff, 2))
+	{
+		// Check if it is LPWAN settings
+		if ((check_buff[0] != 0xAA) || (check_buff[1] != LORAWAN_DATA_MARKER))
+		{
+			// Data is not valid, reset to defaults
+			MYLOG("FLASH", "Invalid data set");
+			if (write_rak15001(0, (uint8_t *)&g_lorawan_settings, sizeof(s_lorawan_settings)))
+			{
+				MYLOG("FLASH", "Wrote default data set");
+			}
+			else
+			{
+				MYLOG("FLASH", "Write failed. Something is wrong");
+				return false;
+			}
+		}
+		else
+		{
+			MYLOG("FLASH", "Found valid dataset");
+		}
+		if (read_rak15001(0, (uint8_t *)&g_lorawan_settings, sizeof(s_lorawan_settings)))
+		{
+			MYLOG("FLASH", "Read saved data set");
+		}
+		log_settings();
+		return true;
+	}
+	else
+	{
+		MYLOG("FLASH", "Reading from RAK15001 failed");
+		g_has_rak15001 = false;
+		return false;
+	}
 }
 
 char *region_names[] = {(char *)"EU433", (char *)"CN470", (char *)"RU864", (char *)"IN865",
@@ -237,100 +289,3 @@ void log_settings(void)
 	MYLOG("FLASH", "096 P2P Preamble length %d", g_lorawan_settings.p2p_preamble_len);
 	MYLOG("FLASH", "097 P2P Symbol Timeout %d", g_lorawan_settings.p2p_symbol_timeout);
 }
-
-// #include "SparkFun_SPI_SerialFlash.h" //Click here to get the library: http://librarymanager/All#SparkFun_SPI_SerialFlash
-
-// /** Flash hal instance */
-// SFE_SPI_FLASH g_flash; // Sparkfun SPI Flash
-
-// /** Flash specific definition */
-// // SPIFlash_Device_t g_RAK15001{
-// // 	.total_size = (1UL << 21),
-// // 	.start_up_time_us = 5000,
-// // 	.manufacturer_id = 0xc8,
-// // 	.memory_type = 0x40,
-// // 	.capacity = 0x15,
-// // 	.max_clock_speed_mhz = 15,
-// // 	.quad_enable_bit_mask = 0x00,
-// // 	.has_sector_protection = false,
-// // 	.supports_fast_read = true,
-// // 	.supports_qspi = false,
-// // 	.supports_qspi_writes = false,
-// // 	.write_status_register_split = false,
-// // 	.single_status_byte = true,
-// // }; // Flash definition structure for GD25Q16C Flash
-
-// bool init_rak15001(void)
-// {
-// 	g_flash.enableDebugging();
-// 	if (!g_flash.begin(WB_SPI_CS)) // Start access to the flash
-// 	{
-// 		MYLOG("FLASH", "E: Flash access failed, check the settings");
-// 		return false;
-// 	}
-
-// 	sfe_flash_manufacturer_e mfgID = g_flash.getManufacturerID();
-// 	if (mfgID != SFE_FLASH_MFG_UNKNOWN)
-// 	{
-// 		MYLOG("FLASH","Manufacturer ID: 0x%02X %s", g_flash.getManufacturerID(),g_flash.manufacturerIDString(mfgID));
-// 	}
-// 	else
-// 	{
-// 		MYLOG("FLASH","Unknown manufacturer ID: 0x%02X", g_flash.getManufacturerID());
-// 	}
-
-// 	MYLOG("FLASH","Device ID: 0x%02X",g_flash.getDeviceID());
-// 	return true;
-// }
-
-// bool read_rak15001(uint16_t address, uint8_t *buffer, uint16_t size)
-// {
-// 	// Read the bytes
-// 	uint16_t bytes_check = g_flash.readBlock(address, buffer, size);
-// 	// Check if number of bytes is same as requester
-// 	if (bytes_check != size)
-// 	{
-// 		MYLOG("FLASH", "E: Bytes read %d, requested %d", bytes_check, size);
-// 		return false;
-// 	}
-// 	return true;
-// }
-
-// bool write_rak15001(uint16_t address, uint8_t *buffer, uint16_t size)
-// {
-// 	uint8_t check_buff[size];
-// 	// Write the bytes
-// 	uint16_t bytes_check = g_flash.writeBlock(address, buffer, size);
-// 	g_flash.blockingBusyWait();
-// 	// Check if number of bytes is same as requester
-// 	if (bytes_check != size)
-// 	{
-// 		MYLOG("FLASH", "E: Bytes written %d, requested %d", bytes_check, size);
-// 		return false;
-// 	}
-// 	// Read back the data
-// 	bytes_check = g_flash.readBlock(address, check_buff, size);
-// 	// Check if number of bytes is same as requested
-// 	if (bytes_check != size)
-// 	{
-// 		MYLOG("FLASH", "E: Bytes read back %d, requested %d", bytes_check, size);
-// 		return false;
-// 	}
-// 	// Check if read data is same as requested data
-// 	if (memcmp(check_buff, buffer, size) != 0)
-// 	{
-// 		MYLOG("FLASH", "E: Bytes read back are not the same as written");
-// 		return false;
-// 	}
-// 	return true;
-// }
-
-// void save_config(void)
-// {
-
-// 	#ifdef _VARIANT_RAK4630_
-// 	#elif defined (_VARIANT_RAK3172_) || (_VARIANT_RAK3172_SIP_)
-// 	#elif
-// 	#error
-// 	#endif
-// }

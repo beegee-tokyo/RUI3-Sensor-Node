@@ -52,7 +52,8 @@ struct s_lorawan_settings
 	uint8_t node_app_eui[8] = {0xac, 0x1f, 0x09, 0xff, 0xf8, 0x68, 0x31, 0x72};
 	// OTAA Application Key MSB
 	uint8_t node_app_key[16] = {0xef, 0xad, 0xff, 0x29, 0xc7, 0x7b, 0x48, 0x29, 0xac, 0xf7, 0x1e, 0x1a, 0x6e, 0x76, 0xf7, 0x13};
-#else
+#endif
+#ifdef _VARIANT_RAK4630_
 												// OTAA Device EUI MSB
 	uint8_t node_device_eui[8] = {0xAC, 0x1F, 0x09, 0xFF, 0xFE, 0x05, 0x71, 0x10};
 	// OTAA Application EUI MSB
@@ -91,9 +92,15 @@ struct s_lorawan_settings
 	// Data port to send data
 	uint8_t app_port = 2;
 	// Flag to enable confirmed messages
-	bool confirmed_msg_enabled = true;
+	bool confirmed_msg_enabled = false;
+#ifdef _VARIANT_RAK3172_
+	// Fixed LoRaWAN lorawan_region
+	uint8_t lora_region = 5;
+#endif
+#ifdef _VARIANT_RAK4630_
 	// Fixed LoRaWAN lorawan_region
 	uint8_t lora_region = 4;
+#endif
 	// Flag for LoRaWAN or LoRa P2P
 	bool lorawan_enable = true;
 	// Frequency in Hz
