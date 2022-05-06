@@ -289,11 +289,11 @@ void setup()
 	// Set packet mode (confirmed/unconfirmed)
 	if (g_lorawan_settings.confirmed_msg_enabled)
 	{
-		MYLOG("SETUP", "Set confirmed packets  %s", api.lorawan.cfm.set(0) ? "Success" : "Fail");
+		MYLOG("SETUP", "Set confirmed packets  %s", api.lorawan.cfm.set(1) ? "Success" : "Fail");
 	}
 	else
 	{
-		MYLOG("SETUP", "Set unconfirmed packets  %s", api.lorawan.cfm.set(1) ? "Success" : "Fail");
+		MYLOG("SETUP", "Set unconfirmed packets  %s", api.lorawan.cfm.set(0) ? "Success" : "Fail");
 	}
 
 	// Start the join process
@@ -369,7 +369,7 @@ void sensor_handler(void *)
 	}
 
 	// Send the packet
-	if (api.lorawan.send(g_solution_data.getSize(), g_solution_data.getBuffer(), 2, g_lorawan_settings.confirmed_msg_enabled, 1))
+	if (api.lorawan.send(g_solution_data.getSize(), g_solution_data.getBuffer(), 2, g_lorawan_settings.confirmed_msg_enabled))
 	{
 		MYLOG("UPLINK", "Packet enqueued");
 	}

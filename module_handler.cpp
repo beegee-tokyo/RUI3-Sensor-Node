@@ -155,7 +155,7 @@ void find_modules(void)
 	{
 		if (!init_rak1904())
 		{
-			found_sensors[LIGHT_ID].found_sensor = false;
+			found_sensors[ACC_ID].found_sensor = false;
 		}
 	}
 
@@ -169,7 +169,7 @@ void find_modules(void)
 				found_sensors[MPU_ID].found_sensor = false;
 				if (!init_rak12040())
 				{
-					found_sensors[MPU_ID].found_sensor = false;
+					found_sensors[TEMP_ARR_ID].found_sensor = false;
 				}
 				else
 				{
