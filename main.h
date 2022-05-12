@@ -33,6 +33,16 @@
 #define MYLOG(...)
 #endif
 
+#ifndef RAK_REGION_AS923_2
+#define RAK_REGION_AS923_2 9
+#endif
+#ifndef RAK_REGION_AS923_3
+#define RAK_REGION_AS923_3 10
+#endif
+#ifndef RAK_REGION_AS923_4
+#define RAK_REGION_AS923_4 11
+#endif
+
 // Globals
 extern char g_dev_name[];
 extern bool g_has_rak15001;
@@ -40,21 +50,31 @@ extern bool g_has_rak15001;
 /** Settings valid marker */
 #define LORAWAN_DATA_MARKER 0x55
 
+/** Select device */
+// #define RUI_DEV 2
+
 /** Structure for the device setup */
 struct s_lorawan_settings
 {
-	uint8_t valid_mark_1 = 0xAA;				// Just a marker for the Flash
-	uint8_t valid_mark_2 = LORAWAN_DATA_MARKER; // Just a marker for the Flash
+	// Just a marker for the Flash
+	uint8_t valid_mark_1 = 0xAA;
+	// Just a marker for the Flash
+	uint8_t valid_mark_2 = LORAWAN_DATA_MARKER;
 #ifdef _VARIANT_RAK3172_
-												// OTAA Device EUI MSB
+#if RUI_DEV == 1
+	// OTAA Device EUI MSB
 	uint8_t node_device_eui[8] = {0xac, 0x1f, 0x09, 0xff, 0xf8, 0x68, 0x31, 0x72};
+#else
+	// OTAA Device EUI MSB
+	uint8_t node_device_eui[8] = {0xac, 0x1f, 0x09, 0xff, 0xfe, 0x05, 0x37, 0xa1};
+#endif
 	// OTAA Application EUI MSB
 	uint8_t node_app_eui[8] = {0xac, 0x1f, 0x09, 0xff, 0xf8, 0x68, 0x31, 0x72};
 	// OTAA Application Key MSB
 	uint8_t node_app_key[16] = {0xef, 0xad, 0xff, 0x29, 0xc7, 0x7b, 0x48, 0x29, 0xac, 0xf7, 0x1e, 0x1a, 0x6e, 0x76, 0xf7, 0x13};
 #endif
 #ifdef _VARIANT_RAK4630_
-												// OTAA Device EUI MSB
+	// OTAA Device EUI MSB
 	uint8_t node_device_eui[8] = {0xAC, 0x1F, 0x09, 0xFF, 0xFE, 0x05, 0x71, 0x10};
 	// OTAA Application EUI MSB
 	uint8_t node_app_eui[8] = {0xAC, 0x1F, 0x09, 0xFF, 0xFE, 0x05, 0x71, 0x10};
@@ -95,11 +115,11 @@ struct s_lorawan_settings
 	bool confirmed_msg_enabled = false;
 #ifdef _VARIANT_RAK3172_
 	// Fixed LoRaWAN lorawan_region
-	uint8_t lora_region = 5;
+	uint8_t lora_region = RAK_REGION_AS923_3;
 #endif
 #ifdef _VARIANT_RAK4630_
 	// Fixed LoRaWAN lorawan_region
-	uint8_t lora_region = 4;
+	uint8_t lora_region = RAK_REGION_EU868;
 #endif
 	// Flag for LoRaWAN or LoRa P2P
 	bool lorawan_enable = true;

@@ -32,6 +32,21 @@ uint8_t node_app_eui[8] = {0}; // ac1f09fff8683172
 uint8_t node_app_key[16] = {0}; // efadff29c77b4829acf71e1a6e76f713
 
 /**
+ * @brief Callback after packet was received
+ *
+ * @param data Structure with the received data
+ */
+void receiveCallback(SERVICE_LORA_RECEIVE_T *data)
+{
+	MYLOG("RX-CB", "Packet received, port %d, DR %d, RSSI %d, SNR %d", data->Port, data->RxDatarate, data->Rssi, data->Snr);
+	for (int i = 0; i < data->BufferSize; i++)
+	{
+		Serial.printf("%02X", data->Buffer[i]);
+	}
+	Serial.print("\r\n");
+}
+
+/**
  * @brief Callback after TX is finished
  *
  * @param status TX status
@@ -111,11 +126,9 @@ void setup()
 	MYLOG("SETUP", "------------------------------------------------------");
 
 	/*************************************
-
 	This code part is an option to use the RAK15001 Flash Module to store the credentials.
 	It is for testing and not fully functional.
 	Credentials sent with AT commands are not automatically stored in the Flash.
-
 	*************************************/
 	// Check if credentials are in the Flash module
 	if (g_has_rak15001)
@@ -241,24 +254,30 @@ void setup()
 				  node_device_eui[4], node_device_eui[5], node_device_eui[6], node_device_eui[7]);
 		}
 	}
-	// log_settings();
+// log_settings();
 
-	/*************************************
+/*************************************
+LoRaWAN band setting:
+RAK_REGION_EU433	0
+RAK_REGION_CN470	1
+RAK_REGION_RU864	2
+RAK_REGION_IN865	3
+RAK_REGION_EU868	4
+RAK_REGION_US915	5
+RAK_REGION_AU915	6
+RAK_REGION_KR920	7
+RAK_REGION_AS923	8
+RAK_REGION_AS923-2	9
+RAK_REGION_AS923-3	10
+RAK_REGION_AS923-4	11
+*************************************/
 
-	LoRaWAN band setting:
-	RAK_REGION_EU433
-	RAK_REGION_CN470
-	RAK_REGION_RU864
-	RAK_REGION_IN865
-	RAK_REGION_EU868
-	RAK_REGION_US915
-	RAK_REGION_AU915
-	RAK_REGION_KR920
-	RAK_REGION_AS923
-
-	*************************************/
-
-	// Set region
+// Set region
+#if RUI_DEV == 1
+	MYLOG("SETUP", "Set Class A %s", api.lorawan.deviceClass.set(0) ? "Success" : "Fail");
+#else
+	MYLOG("SETUP", "Set Class C %s", api.lorawan.deviceClass.set(2) ? "Success" : "Fail");
+#endif
 	MYLOG("SETUP", "Setting band %d", g_lorawan_settings.lora_region);
 	uint8_t curr_band = (uint8_t)api.lorawan.band.get();
 	MYLOG("SETUP", "Current region %d", curr_band);
@@ -305,6 +324,7 @@ void setup()
 	digitalWrite(LED_GREEN, LOW);
 
 	// Setup the callbacks for joined and send finished
+	api.lorawan.registerRecvCallback(receiveCallback);
 	api.lorawan.registerSendCallback(sendCallback);
 	api.lorawan.registerJoinCallback(joinCallback);
 
@@ -323,6 +343,7 @@ void setup()
 
 	// Show found modules
 	announce_modules();
+	MYLOG("SETUP", "Battery voltage %.4f", api.system.bat.get());
 	digitalWrite(LED_BLUE, LOW);
 }
 
@@ -355,7 +376,7 @@ void sensor_handler(void *)
 
 	// Add battery voltage
 	g_solution_data.addVoltage(LPP_CHANNEL_BATT, api.system.bat.get());
-
+	MYLOG("UPLINK", "Battery voltage %.4f", api.system.bat.get());
 	MYLOG("UPLINK", "Send packet with size %d", g_solution_data.getSize());
 
 	// If RAK1921 OLED is available, show some information on the display
