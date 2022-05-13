@@ -4,11 +4,12 @@
  * @brief Initialize and read values from the SCD30 sensor
  * @version 0.1
  * @date 2022-04-11
- * 
+ *
  * @copyright Copyright (c) 2022
- * 
+ *
  */
 #include "main.h"
+#ifndef IS_GNSS_TRACKER_RAK3172
 #include <SparkFun_SCD30_Arduino_Library.h> //Click here to get the library: http://librarymanager/All#SparkFun_SCD30
 
 /** Sensor instance */
@@ -26,13 +27,13 @@ bool init_rak12037(void)
 	pinMode(WB_IO2, OUTPUT);
 	digitalWrite(WB_IO2, HIGH); // power on RAK12037
 
-		Wire.begin();
-		if (!scd30.begin(Wire))
-		{
-			MYLOG("SCD30", "SCD30 not found");
-			digitalWrite(WB_IO2, LOW); // power down RAK12004
-			return false;
-		}
+	Wire.begin();
+	if (!scd30.begin(Wire))
+	{
+		MYLOG("SCD30", "SCD30 not found");
+		digitalWrite(WB_IO2, LOW); // power down RAK12004
+		return false;
+	}
 
 	//**************init SCD30 sensor *****************************************************
 	// Change number of seconds between measurements: 2 to 1800 (30 minutes), stored in non-volatile memory of SCD30
@@ -80,3 +81,4 @@ void read_rak12037(void)
 	g_solution_data.addTemperature(LPP_CHANNEL_CO2_Temp_2, temp_reading);
 	g_solution_data.addRelativeHumidity(LPP_CHANNEL_CO2_HUMID_2, humid_reading);
 }
+#endif // IS_GNSS_TRACKER_RAK3172

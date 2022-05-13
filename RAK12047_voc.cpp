@@ -9,6 +9,7 @@
  * 
  */
 #include "main.h"
+#ifndef IS_GNSS_TRACKER_RAK3172
 #include <SensirionI2CSgp40.h>
 #include <VOCGasIndexAlgorithm.h>
 
@@ -55,19 +56,19 @@ bool init_rak12047(void)
 	}
 	else
 	{
-#if MY_DEBUG > 0
-		Serial.print("SerialNumber:");
-		Serial.print("0x");
-		for (size_t i = 0; i < serialNumberSize; i++)
-		{
-			uint16_t value = serialNumber[i];
-			Serial.print(value < 4096 ? "0" : "");
-			Serial.print(value < 256 ? "0" : "");
-			Serial.print(value < 16 ? "0" : "");
-			Serial.print(value, HEX);
-		}
-		Serial.println();
-#endif
+// #if MY_DEBUG > 0
+// 		Serial.print("SerialNumber:");
+// 		Serial.print("0x");
+// 		for (size_t i = 0; i < serialNumberSize; i++)
+// 		{
+// 			uint16_t value = serialNumber[i];
+// 			Serial.print(value < 4096 ? "0" : "");
+// 			Serial.print(value < 256 ? "0" : "");
+// 			Serial.print(value < 16 ? "0" : "");
+// 			Serial.print(value, HEX);
+// 		}
+// 		Serial.println();
+// #endif
 	}
 
 	uint16_t testResult;
@@ -198,3 +199,4 @@ void do_read_rak12047(void *)
 	digitalWrite(LED_BLUE, LOW);
 #endif
 }
+#endif // IS_GNSS_TRACKER_RAK3172

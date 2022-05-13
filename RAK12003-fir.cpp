@@ -9,6 +9,7 @@
  *
  */
 #include "main.h"
+#ifndef IS_GNSS_TRACKER_RAK3172
 #include <SparkFun_MLX90632_Arduino_Library.h>
 
 /** Instance of sensor class */
@@ -29,22 +30,22 @@ bool init_rak12003(void)
 
 	if (init_result != MLX90632::SENSOR_SUCCESS)
 	{
-		if (init_result == MLX90632::SENSOR_ID_ERROR)
-		{
-			MYLOG("FIR", "Sensor ID did not match the sensor address. Probably a wiring error.");
-		}
-		else if (init_result == MLX90632::SENSOR_I2C_ERROR)
-		{
-			MYLOG("FIR", "Sensor did not respond to I2C properly. Check wiring.");
-		}
-		else if (init_result == MLX90632::SENSOR_TIMEOUT_ERROR)
-		{
-			MYLOG("FIR", "Sensor failed to respond.");
-		}
-		else
-		{
-			MYLOG("FIR", "Other Error");
-		}
+		// if (init_result == MLX90632::SENSOR_ID_ERROR)
+		// {
+		// 	MYLOG("FIR", "Sensor ID did not match the sensor address. Probably a wiring error.");
+		// }
+		// else if (init_result == MLX90632::SENSOR_I2C_ERROR)
+		// {
+		// 	MYLOG("FIR", "Sensor did not respond to I2C properly. Check wiring.");
+		// }
+		// else if (init_result == MLX90632::SENSOR_TIMEOUT_ERROR)
+		// {
+		// 	MYLOG("FIR", "Sensor failed to respond.");
+		// }
+		// else
+		// {
+		// 	MYLOG("FIR", "Other Error");
+		// }
 		return false;
 	}
 
@@ -70,3 +71,4 @@ void read_rak12003(void)
 	g_solution_data.addTemperature(LPP_CHANNEL_TEMP_3, sensor_temp);
 	g_solution_data.addTemperature(LPP_CHANNEL_TEMP_4, object_temp);
 }
+#endif // IS_GNSS_TRACKER_RAK3172

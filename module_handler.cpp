@@ -93,25 +93,25 @@ void find_modules(void)
 		}
 	}
 
-	MYLOG("SCAN", "Found %d sensors", num_dev);
+	// MYLOG("SCAN", "Found %d sensors", num_dev);
 
-	if (num_dev == 0)
-	{
-		for (uint8_t i = 0; i < sizeof(found_sensors) / sizeof(sensors_t); i++)
-		{
-			if (found_sensors[i].found_sensor)
-			{
-				MYLOG("SCAN", "ID %d addr %02X", i, found_sensors[i].i2c_addr);
-			}
-		}
-	}
+	// if (num_dev == 0)
+	// {
+	// 	for (uint8_t i = 0; i < sizeof(found_sensors) / sizeof(sensors_t); i++)
+	// 	{
+	// 		if (found_sensors[i].found_sensor)
+	// 		{
+	// 			MYLOG("SCAN", "ID %d addr %02X", i, found_sensors[i].i2c_addr);
+	// 		}
+	// 	}
+	// }
 
 	// Check if RAK15001 is available
 	if (init_rak15001())
 	{
-		MYLOG("SCAN", "RAK15001 found");
+		// MYLOG("SCAN", "RAK15001 found");
 	}
-	
+
 	// No devices found, no need to go through the initialization routines
 	if (num_dev == 0)
 	{
@@ -156,6 +156,7 @@ void find_modules(void)
 		}
 	}
 
+#ifndef IS_GNSS_TRACKER_RAK3172
 	if (found_sensors[LIGHT_ID].found_sensor)
 	{
 		if (init_rak1903())
@@ -167,6 +168,7 @@ void find_modules(void)
 			found_sensors[LIGHT_ID].found_sensor = false;
 		}
 	}
+#endif
 
 	if (found_sensors[ACC_ID].found_sensor)
 	{
@@ -183,15 +185,17 @@ void find_modules(void)
 			found_sensors[GYRO_ID].found_sensor = false;
 			// if (!init_rak1905())
 			// {
-				// found_sensors[MPU_ID].found_sensor = false;
-				if (!init_rak12040())
-				{
-					found_sensors[TEMP_ARR_ID].found_sensor = false;
-				}
-				else
-				{
-					found_sensors[TEMP_ARR_ID].found_sensor = true;
-				}
+			// found_sensors[MPU_ID].found_sensor = false;
+#ifndef IS_GNSS_TRACKER_RAK3172
+			if (!init_rak12040())
+			{
+				found_sensors[TEMP_ARR_ID].found_sensor = false;
+			}
+			else
+			{
+				found_sensors[TEMP_ARR_ID].found_sensor = true;
+			}
+#endif
 			// }
 			// else
 			// {
@@ -212,6 +216,7 @@ void find_modules(void)
 		}
 	}
 
+#ifndef IS_GNSS_TRACKER_RAK3172
 	if (found_sensors[OLED_ID].found_sensor)
 	{
 		if (init_rak1921())
@@ -223,6 +228,7 @@ void find_modules(void)
 			found_sensors[OLED_ID].found_sensor = false;
 		}
 	}
+#endif
 
 	if (found_sensors[RTC_ID].found_sensor)
 	{
@@ -236,6 +242,7 @@ void find_modules(void)
 		}
 	}
 
+#ifndef IS_GNSS_TRACKER_RAK3172
 	if (found_sensors[FIR_ID].found_sensor)
 	{
 		if (!init_rak12003())
@@ -270,7 +277,6 @@ void find_modules(void)
 
 	if (found_sensors[VOC_ID].found_sensor)
 	{
-		MYLOG("MOD", "init_rak12047");
 		if (init_rak12047())
 		{
 			sprintf(g_dev_name, "RUI3 VOC Sensor");
@@ -280,18 +286,20 @@ void find_modules(void)
 			found_sensors[VOC_ID].found_sensor = false;
 		}
 	}
+#endif
 
-	// if (found_sensors[GNSS_ID].found_sensor)
-	// {
-	// 	if (init_gnss())
-	// 	{
-	// 		sprintf(g_dev_name, "RUI3 Location Tracker");
-	// 	}
-	// 	else
-	// 	{
-	// 		found_sensors[GNSS_ID].found_sensor = false;
-	// 	}
-	// }
+	if (found_sensors[GNSS_ID].found_sensor)
+	{
+		if (init_gnss())
+		{
+			sprintf(g_dev_name, "RUI3 Location Tracker");
+			init_gnss_at();
+		}
+		else
+		{
+			found_sensors[GNSS_ID].found_sensor = false;
+		}
+	}
 }
 
 /**
@@ -302,42 +310,44 @@ void announce_modules(void)
 {
 	if (found_sensors[TEMP_ID].found_sensor)
 	{
-		MYLOG("MOD", "+EVT:RAK1901 OK");
+		Serial.println("+EVT:RAK1901 OK");
 		// Reading sensor data
 		read_rak1901();
 	}
 
 	if (found_sensors[PRESS_ID].found_sensor)
 	{
-		MYLOG("MOD", "+EVT:RAK1902 OK");
+		Serial.println("+EVT:RAK1902 OK");
 		// Reading sensor data
 		read_rak1902();
 	}
 
+#ifndef IS_GNSS_TRACKER_RAK3172
 	if (found_sensors[LIGHT_ID].found_sensor)
 	{
-		MYLOG("MOD", "+EVT:RAK1903 OK");
+		Serial.println("+EVT:RAK1903 OK");
 		// Reading sensor data
 		read_rak1903();
 	}
+#endif
 
 	if (found_sensors[ACC_ID].found_sensor)
 	{
-		MYLOG("MOD", "+EVT:RAK1904 OK");
+		Serial.println("+EVT:RAK1904 OK");
 		// Reading sensor data
 		read_rak1904();
 	}
 
 	if (found_sensors[MPU_ID].found_sensor)
 	{
-		MYLOG("MOD", "+EVT:RAK1905 OK");
+		Serial.println("+EVT:RAK1905 OK");
 		// Reading sensor data
 		read_rak1905();
 	}
 
 	if (found_sensors[ENV_ID].found_sensor)
 	{
-		MYLOG("MOD", "+EVT:RAK1906 OK");
+		Serial.println("+EVT:RAK1906 OK");
 		// Start reading sensor data
 		start_rak1906();
 		delay(100);
@@ -347,49 +357,51 @@ void announce_modules(void)
 
 	if (found_sensors[RTC_ID].found_sensor)
 	{
-		MYLOG("MOD", "+EVT:RAK12002 OK");
+		Serial.println("+EVT:RAK12002 OK");
 		read_rak12002();
 	}
 
+#ifndef IS_GNSS_TRACKER_RAK3172
 	if (found_sensors[FIR_ID].found_sensor)
 	{
-		MYLOG("MOD", "+EVT:RAK12003 OK");
+		Serial.println("+EVT:RAK12003 OK");
 		read_rak12003();
 	}
 
 	if (found_sensors[LIGHT2_ID].found_sensor)
 	{
-		MYLOG("MOD", "+EVT:RAK12010 OK");
+		Serial.println("+EVT:RAK12010 OK");
 		// Reading sensor data
 		read_rak12010();
 	}
 
 	if (found_sensors[CO2_ID].found_sensor)
 	{
-		MYLOG("MOD", "+EVT:RAK12037 OK");
+		Serial.println("+EVT:RAK12037 OK");
 		// Reading sensor data
 		read_rak12037();
 	}
 
 	if (found_sensors[TEMP_ARR_ID].found_sensor)
 	{
-		MYLOG("MOD", "+EVT:RAK12040 OK");
+		Serial.println("+EVT:RAK12040 OK");
 		read_rak12040();
 	}
 
 	if (found_sensors[VOC_ID].found_sensor)
 	{
-		MYLOG("MOD", "+EVT:RAK12047 OK");
+		Serial.println("+EVT:RAK12047 OK");
 		// Sensor needs 100 readings before valid data is available.
 		// Makes no sense to read it already.
 	}
+#endif
 
-	// if (found_sensors[GNSS_ID].found_sensor)
-	// {
-	// 	MYLOG("MOD", "+EVT:RAK12500 OK");
-	// 	// Sensor needs time to get location.
-	// 	// Makes no sense to read it already.
-	// }
+	if (found_sensors[GNSS_ID].found_sensor)
+	{
+		MYLOG("MOD", "+EVT:RAK12500 OK\n");
+		// Sensor needs time to get location.
+		// Makes no sense to read it already.
+	}
 }
 
 /**
@@ -410,11 +422,13 @@ void get_sensor_values(void)
 		read_rak1902();
 	}
 
+#ifndef IS_GNSS_TRACKER_RAK3172
 	if (found_sensors[LIGHT_ID].found_sensor)
 	{
 		// Read sensor data
 		read_rak1903();
 	}
+#endif
 
 	if (found_sensors[ACC_ID].found_sensor)
 	{
@@ -437,6 +451,7 @@ void get_sensor_values(void)
 		read_rak1906();
 	}
 
+#ifndef IS_GNSS_TRACKER_RAK3172
 	if (found_sensors[FIR_ID].found_sensor)
 	{
 		// Read sensor data
@@ -448,7 +463,15 @@ void get_sensor_values(void)
 		// Read sensor data
 		read_rak12010();
 	}
+#endif
 
+	if (found_sensors[RTC_ID].found_sensor)
+	{
+		// Read sensor data
+		read_rak12002();
+	}
+
+#ifndef IS_GNSS_TRACKER_RAK3172
 	if (found_sensors[CO2_ID].found_sensor)
 	{
 		// Read sensor data
@@ -466,10 +489,5 @@ void get_sensor_values(void)
 		// Read sensor data
 		read_rak12047();
 	}
-
-	// if (found_sensors[GNSS_ID].found_sensor)
-	// {
-	// 	// Read sensor data
-	// 	poll_gnss();
-	// }
+#endif
 }

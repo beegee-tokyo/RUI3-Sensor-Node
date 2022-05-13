@@ -9,7 +9,8 @@
  *
  */
 #include "main.h"
-#include <nRF_SSD1306Wire.h>
+#ifndef IS_GNSS_TRACKER_RAK3172 
+#include < nRF_SSD1306Wire.h>
 
 void disp_show(void);
 
@@ -131,3 +132,4 @@ void rak1921_show(void)
 	}
 	oled_display->display();
 }
+#endif // IS_GNSS_TRACKER_RAK3172

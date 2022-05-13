@@ -24,20 +24,8 @@ date_time_s g_date_time;
  */
 bool init_rak12002(void)
 {
-	if (found_sensors[RTC_ID].i2c_num == 1)
-	{
-		Wire.begin();
-		rtc.initI2C(Wire);
-	}
-	else
-	{
-#if WIRE_INTERFACES_COUNT > 1
-		Wire1.begin();
-		rtc.initI2C(Wire1);
-#else
-		return false;
-#endif
-	}
+	Wire.begin();
+	rtc.initI2C(Wire);
 
 	rtc.useEEPROM(false);
 
@@ -70,7 +58,7 @@ bool init_rak12002(void)
 void set_rak12002(uint16_t year, uint8_t month, uint8_t date, uint8_t hour, uint8_t minute)
 {
 	uint8_t weekday = (date + (uint16_t)((2.6 * month) - 0.2) - (2 * (year / 100)) + year + (uint16_t)(year / 4) + (uint16_t)(year / 400)) % 7;
-	MYLOG("RTC", "Calculated weekday is %d", weekday);
+	// MYLOG("RTC", "Calculated weekday is %d", weekday);
 	rtc.setTime(year, month, weekday, date, hour, minute, 0);
 }
 

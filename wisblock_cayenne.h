@@ -11,7 +11,7 @@
 #ifndef WISBLOCK_CAYENNE_H
 #define WISBLOCK_CAYENNE_H
 
-#include <Arduino.h>
+// #include <Arduino.h>
 #include <ArduinoJson.h>
 #include <CayenneLPP.h>
 

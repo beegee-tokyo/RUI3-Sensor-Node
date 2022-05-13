@@ -9,6 +9,7 @@
  * 
  */
 #include "main.h"
+#ifndef IS_GNSS_TRACKER_RAK3172
 #include <Melopero_AMG8833.h>
 
 /** Sensor instance */
@@ -97,3 +98,4 @@ void read_rak12040()
 	}
 	Serial.println();
 }
+#endif // IS_GNSS_TRACKER_RAK3172

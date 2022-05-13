@@ -152,11 +152,18 @@ bool read_config(void);
 
 // Custom AT commands
 bool init_rtc_at(void);
+bool init_gnss_at(void);
+void send_packet(void);
+bool get_at_setting(uint32_t setting_type);
+bool save_at_setting(uint32_t setting_type);
+bool init_frequency_at(void);
 
 // Sensor global definitions
 extern float mean_seal_level_press;
 extern time_t last_trigger;
 extern bool motion_detected;
+extern bool gnss_active;
+extern uint8_t gnss_format;
 
 /** RTC date/time structure */
 struct date_time_s
@@ -170,5 +177,16 @@ struct date_time_s
 	uint8_t second;
 };
 extern date_time_s g_date_time;
+// GNSS precision and data format definitions
+/** GNSS 4 digit precision and standard Cayenne LPP format */
+#define LPP_4_DIGIT 0
+/** GNSS 6 digit precision and extended Cayenne LPP format */
+#define LPP_6_DIGIT 1
+/** Helium Mapper format */
+#define HELIUM_MAPPER 2
+
+/** GNSS settings offset in flash */
+#define GNSS_OFFSET 0x00000000		// length 1 byte
+#define SEND_FREQ_OFFSET 0x00000002 // length 4 bytes
 
 #endif

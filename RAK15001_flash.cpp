@@ -45,7 +45,7 @@ bool g_has_rak15001 = false;
  */
 bool init_rak15001(void)
 {
-	MYLOG("FLASH", "SS = %d", SS);
+	// MYLOG("FLASH", "SS = %d", SS);
 
 	if (!g_flash.begin(&g_RAK15001)) // Start access to the flash
 	{
@@ -58,10 +58,10 @@ bool init_rak15001(void)
 		return false;
 	}
 
-	MYLOG("FLASH", "Device ID: 0x%02X", g_flash.getJEDECID());
-	MYLOG("FLASH", "Size: %ld", g_flash.size());
-	MYLOG("FLASH", "Pages: %d", g_flash.numPages());
-	MYLOG("FLASH", "Page Size: %d", g_flash.pageSize());
+	// MYLOG("FLASH", "Device ID: 0x%02X", g_flash.getJEDECID());
+	// MYLOG("FLASH", "Size: %ld", g_flash.size());
+	// MYLOG("FLASH", "Pages: %d", g_flash.numPages());
+	// MYLOG("FLASH", "Page Size: %d", g_flash.pageSize());
 
 	g_has_rak15001 = true;
 	return true;

@@ -20,12 +20,6 @@ MPU9250_WE mpu_sensor = MPU9250_WE();
 /** Interrupt pin, depends on slot */
 uint8_t mpu_int_pin = WB_IO5;
 
-/** Flag if motion was detected */
-bool motion_detected = false;
-
-/** Last time a motion was detected */
-time_t last_trigger = 0;
-
 /**
  * @brief Initialize MPU9250 9-axis
  * acceleration sensor
