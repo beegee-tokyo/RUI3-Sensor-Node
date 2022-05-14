@@ -124,6 +124,7 @@ void find_modules(void)
 
 	// Initialize the modules found
 
+#ifndef IS_GNSS_TRACKER_RAK3172
 	if (found_sensors[EEPROM_ID].found_sensor)
 	{
 		// Check EEPROM first, it occupies multiple I2C addresses
@@ -156,7 +157,6 @@ void find_modules(void)
 		}
 	}
 
-#ifndef IS_GNSS_TRACKER_RAK3172
 	if (found_sensors[LIGHT_ID].found_sensor)
 	{
 		if (init_rak1903())
@@ -288,6 +288,7 @@ void find_modules(void)
 	}
 #endif
 
+#ifdef IS_GNSS_TRACKER_RAK3172
 	if (found_sensors[GNSS_ID].found_sensor)
 	{
 		if (init_gnss())
@@ -300,6 +301,7 @@ void find_modules(void)
 			found_sensors[GNSS_ID].found_sensor = false;
 		}
 	}
+#endif
 }
 
 /**
@@ -308,6 +310,7 @@ void find_modules(void)
  */
 void announce_modules(void)
 {
+#ifndef IS_GNSS_TRACKER_RAK3172
 	if (found_sensors[TEMP_ID].found_sensor)
 	{
 		Serial.println("+EVT:RAK1901 OK");
@@ -322,7 +325,6 @@ void announce_modules(void)
 		read_rak1902();
 	}
 
-#ifndef IS_GNSS_TRACKER_RAK3172
 	if (found_sensors[LIGHT_ID].found_sensor)
 	{
 		Serial.println("+EVT:RAK1903 OK");
@@ -410,6 +412,7 @@ void announce_modules(void)
  */
 void get_sensor_values(void)
 {
+#ifndef IS_GNSS_TRACKER_RAK3172
 	if (found_sensors[TEMP_ID].found_sensor)
 	{
 		// Read sensor data
@@ -422,7 +425,6 @@ void get_sensor_values(void)
 		read_rak1902();
 	}
 
-#ifndef IS_GNSS_TRACKER_RAK3172
 	if (found_sensors[LIGHT_ID].found_sensor)
 	{
 		// Read sensor data

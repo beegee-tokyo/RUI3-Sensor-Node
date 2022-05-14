@@ -10,6 +10,7 @@
  */
 #include "main.h"
 
+// Forward declarations
 int freq_send_handler(SERIAL_PORT port, char *cmd, stParam *param);
 int rtc_command_handler(SERIAL_PORT port, char *cmd, stParam *param);
 int gnss_format_handler(SERIAL_PORT port, char *cmd, stParam *param);
@@ -205,6 +206,7 @@ int rtc_command_handler(SERIAL_PORT port, char *cmd, stParam *param)
 
 	return AT_OK;
 }
+
 /**
  * @brief Add custom GNSS AT commands
  *

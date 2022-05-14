@@ -19,9 +19,10 @@
 /* THIS IS ONLY REQUIRED FOR RAK3172 !                          */
 /****************************************************************/
 // Enable/disable GNSS module for RAK3172 -> defined => tracker function
-#define IS_GNSS_TRACKER_RAK3172
+// #define IS_GNSS_TRACKER_RAK3172
 #else
-#define IS_GNSS_TRACKER_RAK3172
+// On RAK4630 the whole code fits and works
+// #define IS_GNSS_TRACKER_RAK3172
 #endif
 // Debug
 // Debug output set to 0 to disable app debug output
@@ -69,23 +70,23 @@ struct s_lorawan_settings
 	uint8_t valid_mark_2 = LORAWAN_DATA_MARKER;
 #ifdef _VARIANT_RAK3172_
 #if RUI_DEV == 1
-	// OTAA Device EUI MSB
-	uint8_t node_device_eui[8] = {0xac, 0x1f, 0x09, 0xff, 0xf8, 0x68, 0x31, 0x72};
+	// OTAA Device EUI MSB  // ac1f09fff8052F72
+	uint8_t node_device_eui[8] = {0xac, 0x1f, 0x09, 0xff, 0xf8, 0x05, 0x2F, 0x72};
 #else
-	// OTAA Device EUI MSB
+	// OTAA Device EUI MSB  // ac1f09fffe0537a1
 	uint8_t node_device_eui[8] = {0xac, 0x1f, 0x09, 0xff, 0xfe, 0x05, 0x37, 0xa1};
 #endif
 	// OTAA Application EUI MSB
 	uint8_t node_app_eui[8] = {0xac, 0x1f, 0x09, 0xff, 0xf8, 0x68, 0x31, 0x72};
-	// OTAA Application Key MSB
+	// OTAA Application Key MSB  // efadff29c77b4829acf71e1a6e76f713
 	uint8_t node_app_key[16] = {0xef, 0xad, 0xff, 0x29, 0xc7, 0x7b, 0x48, 0x29, 0xac, 0xf7, 0x1e, 0x1a, 0x6e, 0x76, 0xf7, 0x13};
 #endif
 #ifdef _VARIANT_RAK4630_
-	// OTAA Device EUI MSB
+	// OTAA Device EUI MSB // ac1f09fffe057110
 	uint8_t node_device_eui[8] = {0xAC, 0x1F, 0x09, 0xFF, 0xFE, 0x05, 0x71, 0x10};
 	// OTAA Application EUI MSB
 	uint8_t node_app_eui[8] = {0xAC, 0x1F, 0x09, 0xFF, 0xFE, 0x05, 0x71, 0x10};
-	// OTAA Application Key MSB
+	// OTAA Application Key MSB // 2B84E0B09B68E5CB42176FE753DCEE79
 	uint8_t node_app_key[16] = {0x2B, 0x84, 0xE0, 0xB0, 0x9B, 0x68, 0xE5, 0xCB, 0x42, 0x17, 0x6F, 0xE7, 0x53, 0xDC, 0xEE, 0x79};
 #endif
 	// ABP Device Address MSB

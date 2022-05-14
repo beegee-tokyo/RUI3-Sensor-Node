@@ -78,7 +78,7 @@ void joinCallback(int32_t status)
 	{
 		if (!(ret = api.lorawan.join()))
 		{
-			Serial.println("+EVT:JOIN FAILED");
+			MYLOG("JOIN-CB", "LoRaWan OTAA - join fail! \r\n");
 #ifndef IS_GNSS_TRACKER_RAK3172
 			if (found_sensors[OLED_ID].found_sensor)
 			{
@@ -91,7 +91,7 @@ void joinCallback(int32_t status)
 	{
 		MYLOG("JOIN-CB", "Set the data rate  %s", api.lorawan.dr.set(g_lorawan_settings.data_rate) ? "Success" : "Fail");
 		MYLOG("JOIN-CB", "Disable ADR  %s", api.lorawan.adr.set(g_lorawan_settings.adr_enabled ? 1 : 0) ? "Success" : "Fail");
-		Serial.println("+EVT:JOINED");
+		MYLOG("JOIN-CB", "LoRaWan OTAA - joined! \r\n");
 		digitalWrite(LED_BLUE, LOW);
 
 #ifndef IS_GNSS_TRACKER_RAK3172
@@ -446,7 +446,7 @@ RAK_REGION_AS923-4	11
  */
 void sensor_handler(void *)
 {
-	// MYLOG("SENS", "Start");
+	// MYLOG("UPLINK", "Start");
 	digitalWrite(LED_BLUE, HIGH);
 
 	// Reset trigger time
@@ -488,32 +488,32 @@ void sensor_handler(void *)
 
 		// Add battery voltage
 		g_solution_data.addVoltage(LPP_CHANNEL_BATT, api.system.bat.get());
+	}
 
 #ifdef IS_GNSS_TRACKER_RAK3172
-		// If it is a GNSS location tracker, start the timer to aquire the location
-		if ((found_sensors[GNSS_ID].found_sensor) && !gnss_active)
-		{
-			// Set flag for GNSS active to avoid retrigger */
-			gnss_active = true;
-			// Startup GNSS module
-			init_gnss();
-			// Start the timer
-			udrv_timer_start(TIMER_1, 2500, NULL);
-			check_gnss_counter = 0;
-			// Max location aquisition time is half of send frequency
-			check_gnss_max_try = g_lorawan_settings.send_repeat_time / 2 / 2500;
-		}
-		else if (gnss_active)
-		{
-			return;
-		}
-		else
+	// If it is a GNSS location tracker, start the timer to aquire the location
+	if ((found_sensors[GNSS_ID].found_sensor) && !gnss_active)
+	{
+		// Set flag for GNSS active to avoid retrigger */
+		gnss_active = true;
+		// Startup GNSS module
+		init_gnss();
+		// Start the timer
+		udrv_timer_start(TIMER_1, 2500, NULL);
+		check_gnss_counter = 0;
+		// Max location aquisition time is half of send frequency
+		check_gnss_max_try = g_lorawan_settings.send_repeat_time / 2 / 2500;
+	}
+	else if (gnss_active)
+	{
+		return;
+	}
+	else
 #endif
-		{
-			// No GNSS module, just send the packet with the sensor data
-			send_packet();
-			// digitalWrite(LED_BLUE, LOW);
-		}
+	{
+		// No GNSS module, just send the packet with the sensor data
+		send_packet();
+		// digitalWrite(LED_BLUE, LOW);
 	}
 }
 

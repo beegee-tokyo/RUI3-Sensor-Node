@@ -9,6 +9,7 @@
  *
  */
 #include "main.h"
+#ifndef IS_GNSS_TRACKER_RAK3172
 #include <rak1901.h>
 
 /** Sensor instance */
@@ -83,3 +84,4 @@ void get_rak1901_values(float *values)
 	}
 	return;
 }
+#endif // IS_GNSS_TRACKER_RAK3172
