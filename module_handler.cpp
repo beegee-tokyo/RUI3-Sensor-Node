@@ -30,8 +30,8 @@ volatile sensors_t found_sensors[] = {
 	{0x50, 0, false}, //  9 ✔ RAK15000 EEPROM !! conflict with RAK12008
 	{0x50, 0, false}, // 10 RAK12008 MG812 CO2 gas sensor
 	{0x55, 0, false}, // 11 RAK12009 MQ3 Alcohol gas sensor
-	{0x52, 0, false}, // 12 RAK12014 Laser ToF sensor !! address conflict with RAK12002
-	{0x52, 0, false}, // 13 ✔ RAK12002 RTC module address !! conflict with RAK12014
+	{0x29, 0, false}, // 12 ✔ RAK12014 Laser ToF sensor
+	{0x52, 0, false}, // 13 ✔ RAK12002 RTC module address
 	{0x04, 0, false}, // 14 RAK14003 LED bargraph module
 	{0x59, 0, false}, // 15 ✔ RAK12047 VOC sensor address !! conflict with RAK13600, RAK13003
 	{0x68, 0, false}, // 16 RAK12025 Gyroscope address !! conflict with RAK1905
@@ -69,6 +69,20 @@ void find_modules(void)
 	Wire.setClock(400000);
 	for (byte address = 1; address < 127; address++)
 	{
+		if (address == 0x29)
+		{
+			// RAK12014 has extra GPIO for power control
+			// On/Off control pin
+			pinMode(xshut_pin, OUTPUT);
+			// Sensor on
+			digitalWrite(xshut_pin, HIGH);
+			// Wait for sensor wake-up
+			delay(150);
+		}
+		else
+		{
+			pinMode(WB_IO3, INPUT);
+		}
 		Wire.beginTransmission(address);
 		error = Wire.endTransmission();
 		if (error == 0)
@@ -123,8 +137,6 @@ void find_modules(void)
 	}
 
 	// Initialize the modules found
-
-#ifndef IS_GNSS_TRACKER_RAK3172
 	if (found_sensors[EEPROM_ID].found_sensor)
 	{
 		// Check EEPROM first, it occupies multiple I2C addresses
@@ -168,7 +180,6 @@ void find_modules(void)
 			found_sensors[LIGHT_ID].found_sensor = false;
 		}
 	}
-#endif
 
 	if (found_sensors[ACC_ID].found_sensor)
 	{
@@ -186,7 +197,6 @@ void find_modules(void)
 			// if (!init_rak1905())
 			// {
 			// found_sensors[MPU_ID].found_sensor = false;
-#ifndef IS_GNSS_TRACKER_RAK3172
 			if (!init_rak12040())
 			{
 				found_sensors[TEMP_ARR_ID].found_sensor = false;
@@ -195,7 +205,7 @@ void find_modules(void)
 			{
 				found_sensors[TEMP_ARR_ID].found_sensor = true;
 			}
-#endif
+
 			// }
 			// else
 			// {
@@ -216,7 +226,6 @@ void find_modules(void)
 		}
 	}
 
-#ifndef IS_GNSS_TRACKER_RAK3172
 	if (found_sensors[OLED_ID].found_sensor)
 	{
 		if (init_rak1921())
@@ -228,7 +237,6 @@ void find_modules(void)
 			found_sensors[OLED_ID].found_sensor = false;
 		}
 	}
-#endif
 
 	if (found_sensors[RTC_ID].found_sensor)
 	{
@@ -242,7 +250,6 @@ void find_modules(void)
 		}
 	}
 
-#ifndef IS_GNSS_TRACKER_RAK3172
 	if (found_sensors[FIR_ID].found_sensor)
 	{
 		if (!init_rak12003())
@@ -260,6 +267,15 @@ void find_modules(void)
 		else
 		{
 			found_sensors[LIGHT2_ID].found_sensor = false;
+		}
+	}
+
+	if (found_sensors[TOF_ID].found_sensor)
+	{
+		// Try TOF sensor first
+		if (!init_rak12014())
+		{
+			found_sensors[TOF_ID].found_sensor = false;
 		}
 	}
 
@@ -286,9 +302,7 @@ void find_modules(void)
 			found_sensors[VOC_ID].found_sensor = false;
 		}
 	}
-#endif
 
-#ifdef IS_GNSS_TRACKER_RAK3172
 	if (found_sensors[GNSS_ID].found_sensor)
 	{
 		if (init_gnss())
@@ -301,7 +315,6 @@ void find_modules(void)
 			found_sensors[GNSS_ID].found_sensor = false;
 		}
 	}
-#endif
 }
 
 /**
@@ -310,7 +323,6 @@ void find_modules(void)
  */
 void announce_modules(void)
 {
-#ifndef IS_GNSS_TRACKER_RAK3172
 	if (found_sensors[TEMP_ID].found_sensor)
 	{
 		Serial.println("+EVT:RAK1901 OK");
@@ -331,7 +343,6 @@ void announce_modules(void)
 		// Reading sensor data
 		read_rak1903();
 	}
-#endif
 
 	if (found_sensors[ACC_ID].found_sensor)
 	{
@@ -363,7 +374,6 @@ void announce_modules(void)
 		read_rak12002();
 	}
 
-#ifndef IS_GNSS_TRACKER_RAK3172
 	if (found_sensors[FIR_ID].found_sensor)
 	{
 		Serial.println("+EVT:RAK12003 OK");
@@ -375,6 +385,12 @@ void announce_modules(void)
 		Serial.println("+EVT:RAK12010 OK");
 		// Reading sensor data
 		read_rak12010();
+	}
+
+	if (found_sensors[TOF_ID].found_sensor)
+	{
+		Serial.println("+EVT:RAK12014 OK");
+		read_rak12014();
 	}
 
 	if (found_sensors[CO2_ID].found_sensor)
@@ -396,7 +412,6 @@ void announce_modules(void)
 		// Sensor needs 100 readings before valid data is available.
 		// Makes no sense to read it already.
 	}
-#endif
 
 	if (found_sensors[GNSS_ID].found_sensor)
 	{
@@ -412,7 +427,6 @@ void announce_modules(void)
  */
 void get_sensor_values(void)
 {
-#ifndef IS_GNSS_TRACKER_RAK3172
 	if (found_sensors[TEMP_ID].found_sensor)
 	{
 		// Read sensor data
@@ -430,7 +444,6 @@ void get_sensor_values(void)
 		// Read sensor data
 		read_rak1903();
 	}
-#endif
 
 	if (found_sensors[ACC_ID].found_sensor)
 	{
@@ -453,7 +466,6 @@ void get_sensor_values(void)
 		read_rak1906();
 	}
 
-#ifndef IS_GNSS_TRACKER_RAK3172
 	if (found_sensors[FIR_ID].found_sensor)
 	{
 		// Read sensor data
@@ -465,7 +477,6 @@ void get_sensor_values(void)
 		// Read sensor data
 		read_rak12010();
 	}
-#endif
 
 	if (found_sensors[RTC_ID].found_sensor)
 	{
@@ -473,7 +484,12 @@ void get_sensor_values(void)
 		read_rak12002();
 	}
 
-#ifndef IS_GNSS_TRACKER_RAK3172
+	if (found_sensors[TOF_ID].found_sensor)
+	{
+		// Get the VL53L01 sensor values
+		read_rak12014();
+	}
+
 	if (found_sensors[CO2_ID].found_sensor)
 	{
 		// Read sensor data
@@ -491,5 +507,4 @@ void get_sensor_values(void)
 		// Read sensor data
 		read_rak12047();
 	}
-#endif
 }

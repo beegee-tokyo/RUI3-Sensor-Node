@@ -9,7 +9,6 @@
  *
  */
 #include "main.h"
-#ifndef IS_GNSS_TRACKER_RAK3172
 #include <LPS35HW.h>
 
 /** Sensor instance */
@@ -83,4 +82,4 @@ uint16_t get_alt_rak1902(void)
 	MYLOG("PRESS", "Altitude: %.2f m / %d cm", C, new_val);
 	return new_val;
 }
-#endif // IS_GNSS_TRACKER_RAK3172
+

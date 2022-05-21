@@ -9,7 +9,6 @@
  *
  */
 #include "main.h"
-#ifndef IS_GNSS_TRACKER_RAK3172
 #include <SparkFun_SCD30_Arduino_Library.h> //Click here to get the library: http://librarymanager/All#SparkFun_SCD30
 
 /** Sensor instance */
@@ -81,4 +80,4 @@ void read_rak12037(void)
 	g_solution_data.addTemperature(LPP_CHANNEL_CO2_Temp_2, temp_reading);
 	g_solution_data.addRelativeHumidity(LPP_CHANNEL_CO2_HUMID_2, humid_reading);
 }
-#endif // IS_GNSS_TRACKER_RAK3172
+

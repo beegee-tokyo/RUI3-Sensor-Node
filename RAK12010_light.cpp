@@ -9,7 +9,6 @@
  *
  */
 #include "main.h"
-#ifndef IS_GNSS_TRACKER_RAK3172
 #include "Light_VEML7700.h"
 
 /** Light sensor instance */
@@ -55,4 +54,4 @@ void read_rak12010(void)
 
 	g_solution_data.addLuminosity(LPP_CHANNEL_LIGHT2, light_lux);
 }
-#endif // IS_GNSS_TRACKER_RAK3172
+

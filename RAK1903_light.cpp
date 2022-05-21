@@ -9,7 +9,6 @@
  * 
  */
 #include "main.h"
-#ifndef IS_GNSS_TRACKER_RAK3172
 #include <ClosedCube_OPT3001.h>
 
 /** Sensor instance */
@@ -72,4 +71,3 @@ void read_rak1903()
 		g_solution_data.addLuminosity(LPP_CHANNEL_LIGHT, 0);
 	}
 }
-#endif // IS_GNSS_TRACKER_RAK3172

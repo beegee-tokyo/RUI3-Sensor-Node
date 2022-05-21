@@ -79,12 +79,10 @@ void joinCallback(int32_t status)
 		if (!(ret = api.lorawan.join()))
 		{
 			MYLOG("JOIN-CB", "LoRaWan OTAA - join fail! \r\n");
-#ifndef IS_GNSS_TRACKER_RAK3172
 			if (found_sensors[OLED_ID].found_sensor)
 			{
 				rak1921_add_line((char *)"Join NW failed");
 			}
-#endif
 		}
 	}
 	else
@@ -94,54 +92,12 @@ void joinCallback(int32_t status)
 		MYLOG("JOIN-CB", "LoRaWan OTAA - joined! \r\n");
 		digitalWrite(LED_BLUE, LOW);
 
-#ifndef IS_GNSS_TRACKER_RAK3172
 		if (found_sensors[OLED_ID].found_sensor)
 		{
 			rak1921_add_line((char *)"Joined NW");
 		}
-#endif
 	}
 }
-
-#ifdef IS_GNSS_TRACKER_RAK3172
-/**
- * @brief GNSS location aqcuisition
- * Called every 2.5 seconds by timer 1
- * Gives up after 1/2 of send frequency
- * or when location was aquired
- *
- */
-void gnss_handler(void *)
-{
-	digitalWrite(LED_GREEN, HIGH);
-	if (poll_gnss())
-	{
-		// Power down the module
-		digitalWrite(WB_IO2, LOW);
-		delay(100);
-		MYLOG("GNSS", "Got location");
-		udrv_timer_stop(TIMER_1);
-		send_packet();
-	}
-	else
-	{
-		if (check_gnss_counter >= check_gnss_max_try)
-		{
-			// Power down the module
-			digitalWrite(WB_IO2, LOW);
-			delay(100);
-			MYLOG("GNSS", "Location timeout");
-			udrv_timer_stop(TIMER_1);
-			if (gnss_format != HELIUM_MAPPER)
-			{
-				send_packet();
-			}
-		}
-	}
-	check_gnss_counter++;
-	digitalWrite(LED_GREEN, LOW);
-}
-#endif
 
 /**
  * @brief Arduino setup, called once after reboot/power-up
@@ -401,6 +357,9 @@ RAK_REGION_AS923-4	11
 	api.lorawan.registerSendCallback(sendCallback);
 	api.lorawan.registerJoinCallback(joinCallback);
 
+	// Register the custom AT command to set the send frequency
+	MYLOG("SETUP", "Add custom AT command %s", init_frequency_at() ? "Success" : "Fail");
+
 	// Get saved sending frequency from flash
 	get_at_setting(SEND_FREQ_OFFSET);
 
@@ -412,10 +371,6 @@ RAK_REGION_AS923-4	11
 		udrv_timer_start(TIMER_0, g_lorawan_settings.send_repeat_time, NULL);
 	}
 
-	// Register the custom AT command to set the send frequency
-	MYLOG("SETUP", "Add custom AT command %s", init_frequency_at() ? "Success" : "Fail");
-
-#ifdef IS_GNSS_TRACKER_RAK3172
 	// If a GNSS module was found, setup a timer for the GNSS aqcuisions
 	if (found_sensors[GNSS_ID].found_sensor)
 	{
@@ -423,7 +378,6 @@ RAK_REGION_AS923-4	11
 		// Create a unified timer in C language. This API is defined in udrv_timer.h. It will be replaced by api.system.timer.create() after story #1195 is done.
 		udrv_timer_create(TIMER_1, gnss_handler, HTMR_PERIODIC); // HTMR_ONESHOT);
 	}
-#endif
 
 	MYLOG("SETUP", "Waiting for Lorawan join...");
 	// wait for Join success
@@ -436,6 +390,44 @@ RAK_REGION_AS923-4	11
 	// Show found modules
 	announce_modules();
 	digitalWrite(LED_BLUE, LOW);
+}
+
+/**
+ * @brief GNSS location aqcuisition
+ * Called every 2.5 seconds by timer 1
+ * Gives up after 1/2 of send frequency
+ * or when location was aquired
+ *
+ */
+void gnss_handler(void *)
+{
+	digitalWrite(LED_GREEN, HIGH);
+	if (poll_gnss())
+	{
+		// Power down the module
+		digitalWrite(WB_IO2, LOW);
+		delay(100);
+		MYLOG("GNSS", "Got location");
+		udrv_timer_stop(TIMER_1);
+		send_packet();
+	}
+	else
+	{
+		if (check_gnss_counter >= check_gnss_max_try)
+		{
+			// Power down the module
+			digitalWrite(WB_IO2, LOW);
+			delay(100);
+			MYLOG("GNSS", "Location timeout");
+			udrv_timer_stop(TIMER_1);
+			if (gnss_format != HELIUM_MAPPER)
+			{
+				send_packet();
+			}
+		}
+	}
+	check_gnss_counter++;
+	digitalWrite(LED_GREEN, LOW);
 }
 
 /**
@@ -465,23 +457,19 @@ void sensor_handler(void *)
 		MYLOG("UPLINK", "ACC triggered IRQ");
 		motion_detected = false;
 		clear_int_rak1904();
-#ifdef IS_GNSS_TRACKER_RAK3172
 		if (gnss_active)
 		{
 			// digitalWrite(LED_BLUE, LOW);
 			// GNSS is already active, do nothing
 			return;
 		}
-#endif
 	}
 
 	// Clear payload
 	g_solution_data.reset();
 
-#ifdef IS_GNSS_TRACKER_RAK3172
 	// Helium Mapper ignores sensor and sends only location data
 	if (gnss_format != HELIUM_MAPPER)
-#endif
 	{
 		// Read sensor data
 		get_sensor_values();
@@ -490,7 +478,6 @@ void sensor_handler(void *)
 		g_solution_data.addVoltage(LPP_CHANNEL_BATT, api.system.bat.get());
 	}
 
-#ifdef IS_GNSS_TRACKER_RAK3172
 	// If it is a GNSS location tracker, start the timer to aquire the location
 	if ((found_sensors[GNSS_ID].found_sensor) && !gnss_active)
 	{
@@ -509,11 +496,9 @@ void sensor_handler(void *)
 		return;
 	}
 	else
-#endif
 	{
 		// No GNSS module, just send the packet with the sensor data
 		send_packet();
-		// digitalWrite(LED_BLUE, LOW);
 	}
 }
 
@@ -538,7 +523,6 @@ void send_packet(void)
 {
 	MYLOG("UPLINK", "Send packet with size %d", g_solution_data.getSize());
 
-#ifndef IS_GNSS_TRACKER_RAK3172
 	// If RAK1921 OLED is available, show some information on the display
 	if (found_sensors[OLED_ID].found_sensor)
 	{
@@ -548,7 +532,7 @@ void send_packet(void)
 		sprintf(disp_line, "Seconds since boot %ld", millis() / 1000);
 		rak1921_add_line(disp_line);
 	}
-#endif
+
 	// Send the packet
 	if (api.lorawan.send(g_solution_data.getSize(), g_solution_data.getBuffer(), 2, g_lorawan_settings.confirmed_msg_enabled, 1))
 	{

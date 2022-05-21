@@ -9,7 +9,6 @@
  * 
  */
 #include "main.h"
-#ifndef IS_GNSS_TRACKER_RAK3172
 #include <SensirionI2CSgp40.h>
 #include <VOCGasIndexAlgorithm.h>
 
@@ -199,4 +198,3 @@ void do_read_rak12047(void *)
 	digitalWrite(LED_BLUE, LOW);
 #endif
 }
-#endif // IS_GNSS_TRACKER_RAK3172

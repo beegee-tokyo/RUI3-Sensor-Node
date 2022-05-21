@@ -11,18 +11,7 @@
 #include <Arduino.h>
 
 #ifdef _VARIANT_RAK3172_
-/****************************************************************/
-/* GNSS Location Tracker with RAK3172                           */
-/* Due to limited memory and flash size, if code is used for    */
-/* location tracking, some other modules need to be disabled    */
-/*                                                              */
-/* THIS IS ONLY REQUIRED FOR RAK3172 !                          */
-/****************************************************************/
-// Enable/disable GNSS module for RAK3172 -> defined => tracker function
-// #define IS_GNSS_TRACKER_RAK3172
-#else
-// On RAK4630 the whole code fits and works
-// #define IS_GNSS_TRACKER_RAK3172
+#error This code is too large for RAk3172, check the separate examples for RAK3172
 #endif
 // Debug
 // Debug output set to 0 to disable app debug output

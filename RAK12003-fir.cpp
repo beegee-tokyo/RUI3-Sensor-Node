@@ -9,7 +9,6 @@
  *
  */
 #include "main.h"
-#ifndef IS_GNSS_TRACKER_RAK3172
 #include <SparkFun_MLX90632_Arduino_Library.h>
 
 /** Instance of sensor class */
@@ -71,4 +70,4 @@ void read_rak12003(void)
 	g_solution_data.addTemperature(LPP_CHANNEL_TEMP_3, sensor_temp);
 	g_solution_data.addTemperature(LPP_CHANNEL_TEMP_4, object_temp);
 }
-#endif // IS_GNSS_TRACKER_RAK3172
+
