@@ -9,7 +9,7 @@ The code compiles on RAK4631. For RAK3172 examples see my other RUI3 examples
 - [Hardware supported](#hardware_supported)
 - [Software used](#software_used)
 - [Packet data format](#packet_data_format)
-
+- [Device setup](#device_setup)
 
 ----
 
@@ -154,3 +154,88 @@ The content of the packet depends on the modules installed on the WisBlock Base 
 Channel ID's in cursive are extended format and not supported by standard Cayenne LPP data decoders.
 
 Example decoders for TTN, Chirpstack, Helium and Datacake can be found in the folder [decoders](./decoders) ⤴️
+
+# Device setup
+
+The setup of the device (LoRaWAN region, DevEUI, AppEUI, AppKey, ....) can be done with AT commands over the USB port or with [WisToolBox](https://docs.rakwireless.com/Product-Categories/Software-Tools/WisToolBox/Overview/)
+
+**Example AT commands:**
+```AT
+AT+NWM=1
+AT+NJM=1
+AT+BAND=10
+AT+DEVEUI=1000000000000001
+AT+APPEUI=AB00AB00AB00AB00
+AT+APPKEY=AB00AB00AB00AB00AB00AB00AB00AB00
+ATC+SENDFREQ=600
+```
+
+| Command | Explanation | 
+| --- | --- | 
+| AT+NWM=1 | set the node into LoRaWAN mode |
+| AT+NJM=1 | set network join method to OTAA |
+| AT+BAND=10 | set LPWAN region (here AS923-3) see [AT Command Manual](https://docs.rakwireless.com/RUI3/Serial-Operating-Modes/AT-Command-Manual/#at-band) ⤴️ for all regions |
+| AT+DEVEUI=1000000000000001 | set the device EUI, best to use the DevEUI that is printed on the label of your WisBlock Core module |
+| AT+APPEUI=AB00AB00AB00AB00 | set the application EUI, required on the LoRaWAN server |
+| | AT+APPKEY=AB00AB00AB00AB00AB00AB00AB00AB00 | set the application Key, used to encrypt the data packet during network join |
+ATC+SENDFREQ=600 | set the frequency the sensor node will send data packets. 600 == 10 x 60 seconds == 10minutes |
+
+### _REMARK_
+The manual for all AT commands can be found here: [AT-Command Manual](https://docs.rakwireless.com/RUI3/Serial-Operating-Modes/AT-Command-Manual/) ⤴️
+
+### _REMARK_
+There are additional custom AT commands implemented:
+
+**`ATC+STATUS`** to get the current status of the device.
+
+Example:
+```log
+atc+status=?
+
+Device Status:
+Module: RAK4630
+Version: RUI_3.5.2b_175_RAK4631
+Send time: 120 s
+Network mode LoRaWAN
+Network joined
+Region: 10
+Region: AS923-3
+OTAA mode
+DevEUI = AC1F09FFFE057110
+AppEUI = AC1F09FFFE057110
+AppKey = 2B84E0B09B68E5CB42176FE753DCEE79
++EVT:RAK1901 OK
++EVT:RAK1902 OK
++EVT:RAK1903 OK
++EVT:RAK12019 OK
+OK
+```
+
+**`ATC+SENDFREQ`** to get and set the automatic send interval
+
+Example:
+```log
+atc+sendfreq=?
+
+ATC+SENDFREQ=120s
+OK
+
+atc+sendfreq=120
+OK
+```
+
+If an RAK12002 RTC module is used, the command **`ATC+RTC`** is available to get and set the date time
+
+Example:
+```log
+atc+rtc=?
+
+ATC+RTC=2000.01.01 0:00:21
+
+atc+rtc=2022:10:21:14:15
+OK
+
+atc+rtc=?
+
+ATC+RTC=2022.10.21 14:15:25
+```

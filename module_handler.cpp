@@ -278,6 +278,14 @@ void find_modules(void)
 		}
 	}
 
+	if (found_sensors[UVL_ID].found_sensor)
+	{
+		if (!init_rak12019())
+		{
+			found_sensors[UVL_ID].found_sensor = false;
+		}
+	}
+
 	if (found_sensors[CO2_ID].found_sensor)
 	{
 		if (init_rak12037())
@@ -392,6 +400,12 @@ void announce_modules(void)
 		read_rak12014();
 	}
 
+	if (found_sensors[UVL_ID].found_sensor)
+	{
+		Serial.println("+EVT:RAK12019 OK");
+		read_rak12019();
+	}
+
 	if (found_sensors[CO2_ID].found_sensor)
 	{
 		Serial.println("+EVT:RAK12037 OK");
@@ -487,6 +501,12 @@ void get_sensor_values(void)
 	{
 		// Get the VL53L01 sensor values
 		read_rak12014();
+	}
+
+	if (found_sensors[UVL_ID].found_sensor)
+	{
+		// Get the LTR390 sensor values
+		read_rak12019();
 	}
 
 	if (found_sensors[CO2_ID].found_sensor)

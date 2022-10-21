@@ -137,6 +137,8 @@ void read_rak12010(void);
 extern uint8_t xshut_pin;
 bool init_rak12014(void);
 void read_rak12014(void);
+bool init_rak12019(void);
+void read_rak12019(void);
 bool init_rak12037(void);
 void read_rak12037(void);
 bool init_rak12040(void);
@@ -156,10 +158,11 @@ bool read_config(void);
 // Custom AT commands
 bool init_rtc_at(void);
 bool init_gnss_at(void);
+bool init_status_at(void);
+bool init_frequency_at(void);
 void send_packet(void);
 bool get_at_setting(uint32_t setting_type);
 bool save_at_setting(uint32_t setting_type);
-bool init_frequency_at(void);
 
 // Sensor global definitions
 extern float mean_seal_level_press;

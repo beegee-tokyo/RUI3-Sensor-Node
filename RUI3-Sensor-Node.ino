@@ -116,6 +116,11 @@ void joinCallback(int32_t status)
  */
 void setup()
 {
+	// Setup the callbacks for joined and send finished
+	api.lorawan.registerRecvCallback(receiveCallback);
+	api.lorawan.registerSendCallback(sendCallback);
+	api.lorawan.registerJoinCallback(joinCallback);
+
 	pinMode(LED_GREEN, OUTPUT);
 	digitalWrite(LED_GREEN, HIGH);
 	pinMode(LED_BLUE, OUTPUT);
@@ -129,16 +134,13 @@ void setup()
 	// Use "normal" mode to have AT commands available
 	Serial.begin(115200);
 
-	// api.ble.advertise.stop();
-	// api.ble.uart.stop();
-	api.ble.stop();
-
 #ifdef _VARIANT_RAK4630_
 	time_t serial_timeout = millis();
 	// On nRF52840 the USB serial is not available immediately
 	while (!Serial.available())
+	// while (!Serial)
 	{
-		if ((millis() - serial_timeout) < 5000)
+		if ((millis() - serial_timeout) < 15000)
 		{
 			delay(100);
 			digitalWrite(LED_GREEN, !digitalRead(LED_GREEN));
@@ -156,195 +158,23 @@ void setup()
 	// Find WisBlock I2C modules
 	find_modules();
 
-	MYLOG("SETUP", "RAKwireless %s Node", g_dev_name);
-	MYLOG("SETUP", "------------------------------------------------------");
+	Serial.printf("RAKwireless %s Node\n", g_dev_name);
+	Serial.println("------------------------------------------------------");
+	Serial.println("Setup the device with WisToolBox or AT commands before using it");
+	Serial.println("------------------------------------------------------");
 
-#ifdef _VARIANT_RAK4630_
-	/*************************************
-	This code part is an option to use the RAK15001 Flash Module to store the credentials.
-	It is for testing and not fully functional.
-	Credentials sent with AT commands are not automatically stored in the Flash.
-	*************************************/
-	// Check if credentials are in the Flash module
-	if (g_has_rak15001)
+	// Register the custom AT command to get device status
+	if (!init_status_at())
 	{
-		// Try to get configuration from Flash
-		if (read_config())
-		{
-			if (!api.lorawan.deui.set(g_lorawan_settings.node_device_eui, 8))
-			{
-				MYLOG("SETUP", "LoRaWan OTAA - set device EUI failed!");
-				return;
-			}
-			if (!api.lorawan.appeui.set(g_lorawan_settings.node_app_eui, 8))
-			{
-				MYLOG("SETUP", "LoRaWan OTAA - set app EUI failed!");
-				return;
-			}
-			if (!api.lorawan.appkey.set(g_lorawan_settings.node_app_key, 16))
-			{
-				MYLOG("SETUP", "LoRaWan OTAA - set app key failed!");
-				return;
-			}
-		}
-	}
-	else
-#endif
-	/************************************************************************/
-	/* Experimental                                                         */
-	/* LoRaWAN credentials and settings are taken from structure            */
-	/* s_lorawan_settings. This is used in Arduino BSP WisBlock API and not */
-	/* fully implemented here. Once custom AT commands are available this   */
-	/* can be improved or removed                                           */
-	/************************************************************************/
-	{
-		bool creds_ok = true;
-		if (api.lorawan.appeui.get(node_app_eui, 8))
-		{
-			// MYLOG("SETUP", "Got AppEUI %02X%02X%02X%02X%02X%02X%02X%02X",
-			// 	  node_app_eui[0], node_app_eui[1], node_app_eui[2], node_app_eui[3],
-			// 	  node_app_eui[4], node_app_eui[5], node_app_eui[6], node_app_eui[7]);
-			if (node_app_eui[0] == 0)
-			{
-				MYLOG("SETUP", "LoRaWan OTAA - set application EUI!"); //
-
-				if (!api.lorawan.appeui.set(g_lorawan_settings.node_app_eui, 8))
-				{
-					MYLOG("SETUP", "LoRaWan OTAA - set app EUI failed!");
-					return;
-				}
-			}
-		}
-
-		MYLOG("SETUP", "AppEUI %02X%02X%02X%02X%02X%02X%02X%02X",
-			  node_app_eui[0], node_app_eui[1], node_app_eui[2], node_app_eui[3],
-			  node_app_eui[4], node_app_eui[5], node_app_eui[6], node_app_eui[7]);
-
-		if (api.lorawan.appkey.get(node_app_key, 16))
-		{
-			// MYLOG("SETUP", "Got AppKEY %02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X",
-			// 	  node_app_key[0], node_app_key[1], node_app_key[2], node_app_key[3],
-			// 	  node_app_key[4], node_app_key[5], node_app_key[6], node_app_key[7],
-			// 	  node_app_key[8], node_app_key[9], node_app_key[10], node_app_key[11],
-			// 	  node_app_key[12], node_app_key[13], node_app_key[14], node_app_key[15]);
-			if (node_app_key[0] == 0)
-			{
-				MYLOG("SETUP", "LoRaWan OTAA - set application key!"); //
-				if (!api.lorawan.appkey.set(g_lorawan_settings.node_app_key, 16))
-				{
-					MYLOG("SETUP", "LoRaWan OTAA - set application key failed!");
-					return;
-				}
-			}
-		}
-
-		MYLOG("SETUP", "AppKEY %02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X",
-			  node_app_key[0], node_app_key[1], node_app_key[2], node_app_key[3],
-			  node_app_key[4], node_app_key[5], node_app_key[6], node_app_key[7],
-			  node_app_key[8], node_app_key[9], node_app_key[10], node_app_key[11],
-			  node_app_key[12], node_app_key[13], node_app_key[14], node_app_key[15]);
-
-		if (api.lorawan.deui.get(node_device_eui, 8))
-		{
-			// MYLOG("SETUP", "Got DevEUI %02X%02X%02X%02X%02X%02X%02X%02X",
-			// 	  node_device_eui[0], node_device_eui[1], node_device_eui[2], node_device_eui[3],
-			// 	  node_device_eui[4], node_device_eui[5], node_device_eui[6], node_device_eui[7]);
-			if (node_device_eui[0] == 0)
-			{
-				MYLOG("SETUP", "LoRaWan OTAA - set device EUI!"); //
-				if (!api.lorawan.deui.set(g_lorawan_settings.node_device_eui, 8))
-				{
-					MYLOG("SETUP", "LoRaWan OTAA - set device EUI failed! \r\n");
-					return;
-				}
-			}
-		}
-
-		MYLOG("SETUP", "DevEUI %02X%02X%02X%02X%02X%02X%02X%02X",
-			  node_device_eui[0], node_device_eui[1], node_device_eui[2], node_device_eui[3],
-			  node_device_eui[4], node_device_eui[5], node_device_eui[6], node_device_eui[7]);
-	}
-
-/*************************************
-LoRaWAN band setting:
-RAK_REGION_EU433	0
-RAK_REGION_CN470	1
-RAK_REGION_RU864	2
-RAK_REGION_IN865	3
-RAK_REGION_EU868	4
-RAK_REGION_US915	5
-RAK_REGION_AU915	6
-RAK_REGION_KR920	7
-RAK_REGION_AS923	8
-RAK_REGION_AS923-2	9
-RAK_REGION_AS923-3	10
-RAK_REGION_AS923-4	11
-*************************************/
-
-// Set region
-#ifdef _VARIANT_RAK3172_
-#if RUI_DEV == 1
-	MYLOG("SETUP", "Set Class A %s", api.lorawan.deviceClass.set(0) ? "Success" : "Fail");
-#else
-	MYLOG("SETUP", "Set Class C %s", api.lorawan.deviceClass.set(2) ? "Success" : "Fail");
-#endif
-#endif
-	MYLOG("SETUP", "Set Class A %s", api.lorawan.deviceClass.set(0) ? "Success" : "Fail");
-	// MYLOG("SETUP", "Setting band %d", g_lorawan_settings.lora_region);
-	uint8_t curr_band = (uint8_t)api.lorawan.band.get();
-	// MYLOG("SETUP", "Current region %d", curr_band);
-	if (curr_band == g_lorawan_settings.lora_region)
-	{
-		// MYLOG("SETUP", "Band is already %d", curr_band);
-	}
-	else
-	{
-		MYLOG("SETUP", "Set the region %s", api.lorawan.band.set(g_lorawan_settings.lora_region) ? "Success" : "Fail");
-	}
-
-	MYLOG("SETUP", "Set the transmit power %s", api.lorawan.txp.set(g_lorawan_settings.tx_power) ? "Success" : "Fail");
-
-	// Set subband (only US915, AU195 and CN470)
-	if ((g_lorawan_settings.lora_region == RAK_REGION_US915) ||
-		(g_lorawan_settings.lora_region == RAK_REGION_AU915) ||
-		(g_lorawan_settings.lora_region == RAK_REGION_CN470))
-	{
-		uint16_t maskBuff = 0x0001 << (g_lorawan_settings.subband_channels - 1);
-		MYLOG("SETUP", "Set the channel mask %s", api.lorawan.mask.set(&maskBuff) ? "Success" : "Fail");
-		maskBuff = 0x0000;
-		api.lorawan.mask.get(&maskBuff);
-		MYLOG("SETUP", "Channel mask is set to 0x%04X", maskBuff);
-	}
-
-	// Set the network join mode
-	MYLOG("SETUP", "Set the network join mode %s", api.lorawan.njm.set(g_lorawan_settings.otaa_enabled) ? "Success" : "Fail");
-
-	// Set packet mode (confirmed/unconfirmed)
-	if (g_lorawan_settings.confirmed_msg_enabled)
-	{
-		MYLOG("SETUP", "Set confirmed packets  %s", api.lorawan.cfm.set(0) ? "Success" : "Fail");
-	}
-	else
-	{
-		MYLOG("SETUP", "Set unconfirmed packets  %s", api.lorawan.cfm.set(1) ? "Success" : "Fail");
-	}
-
-	// Start the join process
-	if (!(ret = api.lorawan.join()))
-	{
-		MYLOG("SETUP", "LoRaWan OTAA - join fail! \r\n");
-		return;
+		MYLOG("SETUP", "Add custom AT command STATUS fail");
 	}
 	digitalWrite(LED_GREEN, LOW);
 
-	// Setup the callbacks for joined and send finished
-	api.lorawan.registerRecvCallback(receiveCallback);
-	api.lorawan.registerSendCallback(sendCallback);
-	api.lorawan.registerJoinCallback(joinCallback);
-
 	// Register the custom AT command to set the send frequency
-	MYLOG("SETUP", "Add custom AT command %s", init_frequency_at() ? "Success" : "Fail");
-
+	if (!init_frequency_at())
+	{
+		MYLOG("SETUP", "Add custom AT command Send Interval fail");
+	}
 	// Get saved sending frequency from flash
 	get_at_setting(SEND_FREQ_OFFSET);
 
@@ -364,13 +194,13 @@ RAK_REGION_AS923-4	11
 		udrv_timer_create(TIMER_1, gnss_handler, HTMR_PERIODIC); // HTMR_ONESHOT);
 	}
 
-	MYLOG("SETUP", "Waiting for Lorawan join...");
-	// wait for Join success
-	while (api.lorawan.njs.get() == 0)
-	{
-		api.lorawan.join();
-		delay(10000);
-	}
+	// MYLOG("SETUP", "Waiting for Lorawan join...");
+	// // wait for Join success
+	// while (api.lorawan.njs.get() == 0)
+	// {
+	// 	api.lorawan.join();
+	// 	delay(10000);
+	// }
 
 	// Show found modules
 	announce_modules();
