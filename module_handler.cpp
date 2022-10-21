@@ -194,23 +194,22 @@ void find_modules(void)
 		// if (!init_rak12025())
 		{
 			found_sensors[GYRO_ID].found_sensor = false;
-			// if (!init_rak1905())
-			// {
-			// found_sensors[MPU_ID].found_sensor = false;
-			if (!init_rak12040())
+			if (!init_rak1905())
 			{
-				found_sensors[TEMP_ARR_ID].found_sensor = false;
+				found_sensors[MPU_ID].found_sensor = false;
+				if (!init_rak12040())
+				{
+					found_sensors[TEMP_ARR_ID].found_sensor = false;
+				}
+				else
+				{
+					found_sensors[TEMP_ARR_ID].found_sensor = true;
+				}
 			}
 			else
 			{
-				found_sensors[TEMP_ARR_ID].found_sensor = true;
+				found_sensors[MPU_ID].found_sensor = true;
 			}
-
-			// }
-			// else
-			// {
-			// 	found_sensors[MPU_ID].found_sensor = true;
-			// }
 		}
 	}
 

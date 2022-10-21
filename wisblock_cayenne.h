@@ -23,6 +23,7 @@
 #define LPP_GPS4_SIZE 9
 #define LPP_GPS6_SIZE 11
 #define LPP_GPSH_SIZE 14
+#define LPP_GPST_SIZE 10
 #define LPP_VOC_SIZE 2
 
 class WisCayenne : public CayenneLPP
@@ -33,6 +34,7 @@ public:
 	uint8_t addGNSS_4(uint8_t channel, uint32_t latitude, uint32_t longitude, uint32_t altitude);
 	uint8_t addGNSS_6(uint8_t channel, uint32_t latitude, uint32_t longitude, uint32_t altitude);
 	uint8_t addGNSS_H(uint32_t latitude, uint32_t longitude, uint16_t altitude, uint16_t accuracy, uint16_t battery);
+	uint8_t addGNSS_T(int32_t latitude, int32_t longitude, int16_t altitude, int16_t accuracy, int8_t sats);
 	uint8_t addVoc_index(uint8_t channel, uint32_t voc_index);
 
 private:

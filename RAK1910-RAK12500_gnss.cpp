@@ -23,7 +23,7 @@ SFE_UBLOX_GNSS my_gnss;
 #define RAK12500_GNSS 2
 
 // Fake GPS Enable (1) Disable (0)
-#define FAKE_GPS 0
+#define FAKE_GPS 1
 
 /** GNSS polling function */
 bool poll_gnss(void);
@@ -114,7 +114,8 @@ bool poll_gnss(void)
 	int64_t latitude = 0;
 	int64_t longitude = 0;
 	int32_t altitude = 0;
-	int32_t accuracy = 0;
+	int16_t accuracy = 0;
+	uint8_t satellites = 0;
 
 	time_t check_limit = g_lorawan_settings.send_repeat_time / 2;
 
@@ -148,6 +149,7 @@ bool poll_gnss(void)
 				longitude = my_gnss.getLongitude();
 				altitude = my_gnss.getAltitude();
 				accuracy = my_gnss.getHorizontalDOP();
+				satellites = my_gnss.getSIV();
 
 				// MYLOG("GNSS", "Fixtype: %d %s", my_gnss.getFixType(), fix_type_str);
 				// MYLOG("GNSS", "Lat: %.4f Lon: %.4f", latitude / 10000000.0, longitude / 10000000.0);
@@ -177,6 +179,9 @@ bool poll_gnss(void)
 		case HELIUM_MAPPER:
 			g_solution_data.addGNSS_H(latitude, longitude, altitude, accuracy, api.system.bat.get());
 			break;
+		case FIELD_TESTER:
+			g_solution_data.addGNSS_T(latitude, longitude, altitude, accuracy, satellites);
+			break;
 		}
 
 		// if (found_sensors[OLED_ID].found_sensor)
@@ -195,7 +200,8 @@ bool poll_gnss(void)
 		latitude = 144213730;
 		longitude = 1210069140;
 		altitude = 35000;
-		accuracy = 100;
+		accuracy = 1;
+		satellites = 5;
 
 		switch (gnss_format)
 		{
@@ -207,6 +213,9 @@ bool poll_gnss(void)
 			break;
 		case HELIUM_MAPPER:
 			g_solution_data.addGNSS_H(latitude, longitude, altitude, accuracy, api.system.bat.get());
+			break;
+		case FIELD_TESTER:
+			g_solution_data.addGNSS_T(latitude, longitude, altitude, accuracy, satellites);
 			break;
 		}
 		last_read_ok = true;
@@ -229,4 +238,3 @@ bool poll_gnss(void)
 	last_read_ok = false;
 	return false;
 }
-

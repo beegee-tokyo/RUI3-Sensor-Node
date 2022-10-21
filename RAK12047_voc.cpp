@@ -12,10 +12,12 @@
 #include <SensirionI2CSgp40.h>
 #include <VOCGasIndexAlgorithm.h>
 
+/** Sampling interval for the algorithm */
+int32_t sampling_interval = 10;
 /** Instance for the VOC sensor */
 SensirionI2CSgp40 sgp40;
 /** Instance for the VOC algorithm */
-VOCGasIndexAlgorithm voc_algorithm = VOCGasIndexAlgorithm();
+VOCGasIndexAlgorithm voc_algorithm(sampling_interval);
 
 /** Calculated VOC index */
 int32_t voc_index = 0;
@@ -101,7 +103,7 @@ bool init_rak12047(void)
 	// Create a unified timer in C language. This API is defined in udrv_timer.h. It will be replaced by api.system.timer.create() after story #1195 is done.
 	udrv_timer_create(TIMER_1, do_read_rak12047, HTMR_PERIODIC);
 	// Start a unified C timer in C language. This API is defined in udrv_timer.h. It will be replaced by api.system.timer.start() after story #1195 is done.
-	udrv_timer_start(TIMER_1, 1000, NULL);
+	udrv_timer_start(TIMER_1, sampling_interval * 1000, NULL);
 
 	return true;
 }
@@ -130,7 +132,7 @@ void read_rak12047(void)
 /**
  * @brief Read the current VOC and feed it to the
  *        VOC algorithm
- *        Called every 1 second by a timer
+ *        Called every sampling_interval second by a timer
  *
  */
 void do_read_rak12047(void *)

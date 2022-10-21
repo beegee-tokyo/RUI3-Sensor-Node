@@ -218,7 +218,7 @@ bool init_gnss_at(void)
 	bool result = false;
 
 	result = api.system.atMode.add((char *)"GNSS",
-								   (char *)"Change GNSS precision and payload format. 0 = 4digit prec., 1 = 6digit prec, 2 = Helium Mapper format",
+								   (char *)"Change GNSS precision and payload format. 0 = 4digit prec., 1 = 6digit prec, 2 = Helium Mapper format, 3 = Field Tester format",
 								   (char *)"GNSS", gnss_format_handler);
 
 	if (!get_at_setting(GNSS_OFFSET))
@@ -236,6 +236,9 @@ bool init_gnss_at(void)
 		break;
 	case HELIUM_MAPPER:
 		MYLOG("AT_CMD", "GNSS Helium Mapper data format");
+		break;
+	case FIELD_TESTER:
+		MYLOG("AT_CMD", "GNSS Field Tester data format");
 		break;
 	}
 
@@ -269,6 +272,9 @@ int gnss_format_handler(SERIAL_PORT port, char *cmd, stParam *param)
 		case HELIUM_MAPPER:
 			Serial.println("Helium Mapper data format");
 			break;
+		case FIELD_TESTER:
+			Serial.println("Field Tester data format");
+			break;
 		}
 	}
 	else if (param->argc == 1)
@@ -286,7 +292,7 @@ int gnss_format_handler(SERIAL_PORT port, char *cmd, stParam *param)
 
 		MYLOG("AT_CMD", "Requested format %ld", gnss_format_new);
 
-		if (gnss_format_new > HELIUM_MAPPER)
+		if (gnss_format_new > FIELD_TESTER)
 		{
 			return AT_PARAM_ERROR;
 		}
@@ -332,7 +338,7 @@ bool get_at_setting(uint32_t setting_type)
 			gnss_format = 0;
 			save_at_setting(GNSS_OFFSET);
 		}
-		if (flash_value[0] > HELIUM_MAPPER)
+		if (flash_value[0] > FIELD_TESTER)
 		{
 			MYLOG("AT_CMD", "No valid GNSS value found, set to default, read 0X%0X", flash_value[0]);
 			gnss_format = 0;

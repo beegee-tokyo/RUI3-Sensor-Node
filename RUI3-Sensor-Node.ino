@@ -52,6 +52,17 @@ void receiveCallback(SERVICE_LORA_RECEIVE_T *data)
 		Serial.printf("%02X", data->Buffer[i]);
 	}
 	Serial.print("\r\n");
+	if ((gnss_format == FIELD_TESTER) && (data->Port == 2))
+	{
+		int16_t min_rssi = data->Buffer[1] - 200;
+		int16_t max_rssi = data->Buffer[2] - 200;
+		int16_t min_distance = data->Buffer[3] * 250;
+		int16_t max_distance = data->Buffer[4] * 250;
+		int8_t num_gateways = data->Buffer[5];
+		Serial.printf("+EVT:FieldTester %d gateways\n", num_gateways);
+		Serial.printf("+EVT:RSSI min %d max %d\n", min_rssi, max_rssi);
+		Serial.printf("+EVT:Distance min %d max %d\n", min_distance, max_distance);
+	}
 }
 
 /**
@@ -117,6 +128,10 @@ void setup()
 	// Serial.begin(115200, RAK_CUSTOM_MODE);
 	// Use "normal" mode to have AT commands available
 	Serial.begin(115200);
+
+	// api.ble.advertise.stop();
+	// api.ble.uart.stop();
+	api.ble.stop();
 
 #ifdef _VARIANT_RAK4630_
 	time_t serial_timeout = millis();
@@ -191,30 +206,19 @@ void setup()
 			// 	  node_app_eui[4], node_app_eui[5], node_app_eui[6], node_app_eui[7]);
 			if (node_app_eui[0] == 0)
 			{
-				creds_ok = false;
-			}
-			else
-			{
-				creds_ok = true;
+				MYLOG("SETUP", "LoRaWan OTAA - set application EUI!"); //
+
+				if (!api.lorawan.appeui.set(g_lorawan_settings.node_app_eui, 8))
+				{
+					MYLOG("SETUP", "LoRaWan OTAA - set app EUI failed!");
+					return;
+				}
 			}
 		}
 
-		if (!creds_ok)
-		{
-			MYLOG("SETUP", "LoRaWan OTAA - set application EUI!"); //
-
-			if (!api.lorawan.appeui.set(g_lorawan_settings.node_app_eui, 8))
-			{
-				MYLOG("SETUP", "LoRaWan OTAA - set app EUI failed!");
-				return;
-			}
-		}
-		// if (api.lorawan.appeui.get(node_app_eui, 8))
-		// {
-		// 	MYLOG("SETUP", "Got AppEUI %02X%02X%02X%02X%02X%02X%02X%02X",
-		// 		  node_app_eui[0], node_app_eui[1], node_app_eui[2], node_app_eui[3],
-		// 		  node_app_eui[4], node_app_eui[5], node_app_eui[6], node_app_eui[7]);
-		// }
+		MYLOG("SETUP", "AppEUI %02X%02X%02X%02X%02X%02X%02X%02X",
+			  node_app_eui[0], node_app_eui[1], node_app_eui[2], node_app_eui[3],
+			  node_app_eui[4], node_app_eui[5], node_app_eui[6], node_app_eui[7]);
 
 		if (api.lorawan.appkey.get(node_app_key, 16))
 		{
@@ -225,31 +229,20 @@ void setup()
 			// 	  node_app_key[12], node_app_key[13], node_app_key[14], node_app_key[15]);
 			if (node_app_key[0] == 0)
 			{
-				creds_ok = false;
-			}
-			else
-			{
-				creds_ok = true;
+				MYLOG("SETUP", "LoRaWan OTAA - set application key!"); //
+				if (!api.lorawan.appkey.set(g_lorawan_settings.node_app_key, 16))
+				{
+					MYLOG("SETUP", "LoRaWan OTAA - set application key failed!");
+					return;
+				}
 			}
 		}
 
-		if (!creds_ok)
-		{
-			MYLOG("SETUP", "LoRaWan OTAA - set application key!"); //
-			if (!api.lorawan.appkey.set(g_lorawan_settings.node_app_key, 16))
-			{
-				MYLOG("SETUP", "LoRaWan OTAA - set application key failed!");
-				return;
-			}
-		}
-		// if (api.lorawan.appkey.get(node_app_key, 16))
-		// {
-		// 	MYLOG("SETUP", "Got AppKEY %02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X",
-		// 		  node_app_key[0], node_app_key[1], node_app_key[2], node_app_key[3],
-		// 		  node_app_key[4], node_app_key[5], node_app_key[6], node_app_key[7],
-		// 		  node_app_key[8], node_app_key[9], node_app_key[10], node_app_key[11],
-		// 		  node_app_key[12], node_app_key[13], node_app_key[14], node_app_key[15]);
-		// }
+		MYLOG("SETUP", "AppKEY %02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X",
+			  node_app_key[0], node_app_key[1], node_app_key[2], node_app_key[3],
+			  node_app_key[4], node_app_key[5], node_app_key[6], node_app_key[7],
+			  node_app_key[8], node_app_key[9], node_app_key[10], node_app_key[11],
+			  node_app_key[12], node_app_key[13], node_app_key[14], node_app_key[15]);
 
 		if (api.lorawan.deui.get(node_device_eui, 8))
 		{
@@ -258,29 +251,18 @@ void setup()
 			// 	  node_device_eui[4], node_device_eui[5], node_device_eui[6], node_device_eui[7]);
 			if (node_device_eui[0] == 0)
 			{
-				creds_ok = false;
-			}
-			else
-			{
-				creds_ok = true;
+				MYLOG("SETUP", "LoRaWan OTAA - set device EUI!"); //
+				if (!api.lorawan.deui.set(g_lorawan_settings.node_device_eui, 8))
+				{
+					MYLOG("SETUP", "LoRaWan OTAA - set device EUI failed! \r\n");
+					return;
+				}
 			}
 		}
 
-		if (!creds_ok)
-		{
-			MYLOG("SETUP", "LoRaWan OTAA - set device EUI!"); //
-			if (!api.lorawan.deui.set(g_lorawan_settings.node_device_eui, 8))
-			{
-				MYLOG("SETUP", "LoRaWan OTAA - set device EUI failed! \r\n");
-				return;
-			}
-		}
-		// if (api.lorawan.deui.get(node_device_eui, 8))
-		// {
-		// 	MYLOG("SETUP", "Got DevEUI %02X%02X%02X%02X%02X%02X%02X%02X",
-		// 		  node_device_eui[0], node_device_eui[1], node_device_eui[2], node_device_eui[3],
-		// 		  node_device_eui[4], node_device_eui[5], node_device_eui[6], node_device_eui[7]);
-		// }
+		MYLOG("SETUP", "DevEUI %02X%02X%02X%02X%02X%02X%02X%02X",
+			  node_device_eui[0], node_device_eui[1], node_device_eui[2], node_device_eui[3],
+			  node_device_eui[4], node_device_eui[5], node_device_eui[6], node_device_eui[7]);
 	}
 
 /*************************************
@@ -300,11 +282,14 @@ RAK_REGION_AS923-4	11
 *************************************/
 
 // Set region
+#ifdef _VARIANT_RAK3172_
 #if RUI_DEV == 1
 	MYLOG("SETUP", "Set Class A %s", api.lorawan.deviceClass.set(0) ? "Success" : "Fail");
 #else
 	MYLOG("SETUP", "Set Class C %s", api.lorawan.deviceClass.set(2) ? "Success" : "Fail");
 #endif
+#endif
+	MYLOG("SETUP", "Set Class A %s", api.lorawan.deviceClass.set(0) ? "Success" : "Fail");
 	// MYLOG("SETUP", "Setting band %d", g_lorawan_settings.lora_region);
 	uint8_t curr_band = (uint8_t)api.lorawan.band.get();
 	// MYLOG("SETUP", "Current region %d", curr_band);
@@ -469,7 +454,7 @@ void sensor_handler(void *)
 	g_solution_data.reset();
 
 	// Helium Mapper ignores sensor and sends only location data
-	if (gnss_format != HELIUM_MAPPER)
+	if ((gnss_format != HELIUM_MAPPER) && (gnss_format != FIELD_TESTER))
 	{
 		// Read sensor data
 		get_sensor_values();
@@ -534,7 +519,7 @@ void send_packet(void)
 	}
 
 	// Send the packet
-	if (api.lorawan.send(g_solution_data.getSize(), g_solution_data.getBuffer(), 2, g_lorawan_settings.confirmed_msg_enabled, 1))
+	if (api.lorawan.send(g_solution_data.getSize(), g_solution_data.getBuffer(), 1, g_lorawan_settings.confirmed_msg_enabled, 1))
 	{
 		MYLOG("UPLINK", "Packet enqueued");
 	}

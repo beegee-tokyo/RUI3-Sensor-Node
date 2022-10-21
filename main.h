@@ -116,7 +116,7 @@ struct s_lorawan_settings
 #endif
 #ifdef _VARIANT_RAK4630_
 	// Fixed LoRaWAN lorawan_region
-	uint8_t lora_region = RAK_REGION_EU868;
+	uint8_t lora_region = RAK_REGION_AS923_3; // RAK_REGION_EU868;
 #endif
 	// Flag for LoRaWAN or LoRa P2P
 	bool lorawan_enable = true;

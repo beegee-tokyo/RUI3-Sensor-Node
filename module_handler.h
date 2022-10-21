@@ -187,6 +187,8 @@ extern date_time_s g_date_time;
 #define LPP_6_DIGIT 1
 /** Helium Mapper format */
 #define HELIUM_MAPPER 2
+/** Field Tester format */
+#define FIELD_TESTER 3
 
 /** GNSS settings offset in flash */
 #define GNSS_OFFSET 0x00000000		// length 1 byte
