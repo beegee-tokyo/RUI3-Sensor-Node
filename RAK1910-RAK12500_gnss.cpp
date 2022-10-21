@@ -117,7 +117,7 @@ bool poll_gnss(void)
 	int16_t accuracy = 0;
 	uint8_t satellites = 0;
 
-	time_t check_limit = g_lorawan_settings.send_repeat_time / 2;
+	time_t check_limit = g_send_repeat_time / 2;
 
 	bool has_pos = false;
 	bool has_alt = false;

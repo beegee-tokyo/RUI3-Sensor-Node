@@ -20,16 +20,14 @@ WisCayenne g_solution_data(255);
 /** Set the device name, max length is 10 characters */
 char g_dev_name[64] = "RUI3 Sensor Node                                              ";
 
-/** Device settings */
-s_lorawan_settings g_lorawan_settings;
-s_lorawan_settings check_settings;
+/** Packet is confirmed/unconfirmed (Set with AT commands) */
+bool g_confirmed_mode = false;
+/** If confirmed packet, number or retries (Set with AT commands)*/
+uint8_t g_confirmed_retry = 0;
+uint8_t g_data_rate = 3;
 
-/** OTAA Device EUI MSB */
-uint8_t node_device_eui[8] = {0}; // ac1f09fff8683172
-/** OTAA Application EUI MSB */
-uint8_t node_app_eui[8] = {0}; // ac1f09fff8683172
-/** OTAA Application Key MSB */
-uint8_t node_app_key[16] = {0}; // efadff29c77b4829acf71e1a6e76f713
+/** fPort to send packages */
+uint8_t set_fPort = 2;
 
 /** Counter for GNSS readings */
 uint16_t check_gnss_counter = 0;
@@ -98,8 +96,8 @@ void joinCallback(int32_t status)
 	}
 	else
 	{
-		MYLOG("JOIN-CB", "Set the data rate  %s", api.lorawan.dr.set(g_lorawan_settings.data_rate) ? "Success" : "Fail");
-		MYLOG("JOIN-CB", "Disable ADR  %s", api.lorawan.adr.set(g_lorawan_settings.adr_enabled ? 1 : 0) ? "Success" : "Fail");
+		bool result_set_dr = api.lorawan.dr.set(g_data_rate);
+		MYLOG("JOIN-CB", "Set the data rate  %s", result_set_dr ? "Success" : "Fail");
 		MYLOG("JOIN-CB", "LoRaWan OTAA - joined! \r\n");
 		digitalWrite(LED_BLUE, LOW);
 
@@ -116,6 +114,12 @@ void joinCallback(int32_t status)
  */
 void setup()
 {
+	g_confirmed_mode = api.lorawan.cfm.get();
+
+	g_confirmed_retry = api.lorawan.rety.get();
+
+	g_data_rate = api.lorawan.dr.get();
+
 	// Setup the callbacks for joined and send finished
 	api.lorawan.registerRecvCallback(receiveCallback);
 	api.lorawan.registerSendCallback(sendCallback);
@@ -180,10 +184,10 @@ void setup()
 
 	// Create a unified timer in C language. This API is defined in udrv_timer.h. It will be replaced by api.system.timer.create() after story #1195 is done.
 	udrv_timer_create(TIMER_0, sensor_handler, HTMR_PERIODIC);
-	if (g_lorawan_settings.send_repeat_time != 0)
+	if (g_send_repeat_time != 0)
 	{
 		// Start a unified C timer in C language. This API is defined in udrv_timer.h. It will be replaced by api.system.timer.start() after story #1195 is done.
-		udrv_timer_start(TIMER_0, g_lorawan_settings.send_repeat_time, NULL);
+		udrv_timer_start(TIMER_0, g_send_repeat_time, NULL);
 	}
 
 	// If a GNSS module was found, setup a timer for the GNSS aqcuisions
@@ -247,7 +251,7 @@ void gnss_handler(void *)
 
 /**
  * @brief sensor_handler is a timer function called every
- * g_lorawan_settings.send_repeat_time milliseconds. Default is 120000. Can be
+ * g_send_repeat_time milliseconds. Default is 120000. Can be
  * changed in main.h
  *
  */
@@ -304,7 +308,7 @@ void sensor_handler(void *)
 		udrv_timer_start(TIMER_1, 2500, NULL);
 		check_gnss_counter = 0;
 		// Max location aquisition time is half of send frequency
-		check_gnss_max_try = g_lorawan_settings.send_repeat_time / 2 / 2500;
+		check_gnss_max_try = g_send_repeat_time / 2 / 2500;
 	}
 	else if (gnss_active)
 	{
@@ -336,7 +340,7 @@ void loop()
  */
 void send_packet(void)
 {
-	MYLOG("UPLINK", "Send packet with size %d", g_solution_data.getSize());
+	Serial.printf("Send packet with size %d on port %d\n", g_solution_data.getSize(), set_fPort);
 
 	// If RAK1921 OLED is available, show some information on the display
 	if (found_sensors[OLED_ID].found_sensor)
@@ -349,7 +353,7 @@ void send_packet(void)
 	}
 
 	// Send the packet
-	if (api.lorawan.send(g_solution_data.getSize(), g_solution_data.getBuffer(), 1, g_lorawan_settings.confirmed_msg_enabled, 1))
+	if (api.lorawan.send(g_solution_data.getSize(), g_solution_data.getBuffer(), set_fPort, g_confirmed_mode, g_confirmed_retry))
 	{
 		MYLOG("UPLINK", "Packet enqueued");
 	}

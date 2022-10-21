@@ -208,7 +208,7 @@ void int_callback_rak1904(void)
 {
 	MYLOG("ACC", "Interrupt triggered");
 	// detachInterrupt(acc_int_pin);
-	if ((millis() - last_trigger) > (g_lorawan_settings.send_repeat_time / 2) && !gnss_active)
+	if ((millis() - last_trigger) > (g_send_repeat_time / 2) && !gnss_active)
 	{
 		motion_detected = true;
 		last_trigger = millis();
@@ -217,7 +217,7 @@ void int_callback_rak1904(void)
 		// Stop a unified C timer in C language. This API is defined in udrv_timer.h. It will be replaced by api.system.timer.stop() after story #1195 is done.
 		udrv_timer_stop(TIMER_0);
 		// Start a unified C timer in C language. This API is defined in udrv_timer.h. It will be replaced by api.system.timer.start() after story #1195 is done.
-		udrv_timer_start(TIMER_0, g_lorawan_settings.send_repeat_time, NULL);
+		udrv_timer_start(TIMER_0, g_send_repeat_time, NULL);
 	}
 	else
 	{
@@ -374,7 +374,7 @@ void clear_int_rak1904(void)
 // 		// Stop a unified C timer in C language. This API is defined in udrv_timer.h. It will be replaced by api.system.timer.stop() after story #1195 is done.
 // 		udrv_timer_stop(TIMER_0);
 // 		// Start a unified C timer in C language. This API is defined in udrv_timer.h. It will be replaced by api.system.timer.start() after story #1195 is done.
-// 		udrv_timer_start(TIMER_0, g_lorawan_settings.send_repeat_time, NULL);
+// 		udrv_timer_start(TIMER_0, g_send_repeat_time, NULL);
 // 		motion_detected = true;
 // 	}
 // 	clear_int_rak1904();
@@ -523,7 +523,7 @@ void clear_int_rak1904(void)
 // 		// Stop a unified C timer in C language. This API is defined in udrv_timer.h. It will be replaced by api.system.timer.stop() after story #1195 is done.
 // 		udrv_timer_stop(TIMER_0);
 // 		// Start a unified C timer in C language. This API is defined in udrv_timer.h. It will be replaced by api.system.timer.start() after story #1195 is done.
-// 		udrv_timer_start(TIMER_0, g_lorawan_settings.send_repeat_time, NULL);
+// 		udrv_timer_start(TIMER_0, g_send_repeat_time, NULL);
 // 		motion_detected = true;
 // 	}
 // 	clear_int_rak1904();

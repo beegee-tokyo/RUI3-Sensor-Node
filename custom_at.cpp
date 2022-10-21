@@ -16,6 +16,8 @@ int rtc_command_handler(SERIAL_PORT port, char *cmd, stParam *param);
 int gnss_format_handler(SERIAL_PORT port, char *cmd, stParam *param);
 int status_handler(SERIAL_PORT port, char *cmd, stParam *param);
 
+uint32_t g_send_repeat_time = 0;
+
 /**
  * @brief GNSS format and precision
  * 0 = 4 digit standard Cayenne LPP format
@@ -52,7 +54,7 @@ int freq_send_handler(SERIAL_PORT port, char *cmd, stParam *param)
 	if (param->argc == 1 && !strcmp(param->argv[0], "?"))
 	{
 		Serial.print(cmd);
-		Serial.printf("=%lds\r\n", g_lorawan_settings.send_repeat_time / 1000);
+		Serial.printf("=%lds\r\n", g_send_repeat_time / 1000);
 	}
 	else if (param->argc == 1)
 	{
@@ -70,15 +72,15 @@ int freq_send_handler(SERIAL_PORT port, char *cmd, stParam *param)
 
 		MYLOG("AT_CMD", "Requested frequency %ld", new_send_freq);
 
-		g_lorawan_settings.send_repeat_time = new_send_freq * 1000;
+		g_send_repeat_time = new_send_freq * 1000;
 
-		MYLOG("AT_CMD", "New frequency %ld", g_lorawan_settings.send_repeat_time);
+		MYLOG("AT_CMD", "New frequency %ld", g_send_repeat_time);
 		// Stop the timer
 		udrv_timer_stop(TIMER_0);
-		if (g_lorawan_settings.send_repeat_time != 0)
+		if (g_send_repeat_time != 0)
 		{
 			// Restart the timer
-			udrv_timer_start(TIMER_0, g_lorawan_settings.send_repeat_time, NULL);
+			udrv_timer_start(TIMER_0, g_send_repeat_time, NULL);
 		}
 		// Save custom settings
 		save_at_setting(SEND_FREQ_OFFSET);
@@ -362,7 +364,7 @@ int status_handler(SERIAL_PORT port, char *cmd, stParam *param)
 		// Serial.printf("Version: %s\r\n", api.system.firmwareVersion.get().c_str()); // api.system.firmwareVer.get().c_str()
 		/// \todo new API call
 		Serial.printf("Version: %s\r\n", api.system.firmwareVer.get().c_str());
-		Serial.printf("Send time: %d s\r\n", g_lorawan_settings.send_repeat_time / 1000);
+		Serial.printf("Send time: %d s\r\n", g_send_repeat_time / 1000);
 		nw_mode = api.lorawan.nwm.get();
 		Serial.printf("Network mode %s\r\n", nwm_list[nw_mode]);
 		if (nw_mode == 1)
@@ -479,19 +481,19 @@ bool get_at_setting(uint32_t setting_type)
 			MYLOG("AT_CMD", "No valid send frequency found, set to default, read 0X%02X 0X%02X 0X%02X 0X%02X",
 				  flash_value[0], flash_value[1],
 				  flash_value[2], flash_value[3]);
-			g_lorawan_settings.send_repeat_time = 0;
+			g_send_repeat_time = 0;
 			save_at_setting(SEND_FREQ_OFFSET);
 			return false;
 		}
 		MYLOG("AT_CMD", "Read send frequency 0X%02X 0X%02X 0X%02X 0X%02X",
 			  flash_value[0], flash_value[1],
 			  flash_value[2], flash_value[3]);
-		g_lorawan_settings.send_repeat_time = 0;
-		g_lorawan_settings.send_repeat_time |= flash_value[0] << 0;
-		g_lorawan_settings.send_repeat_time |= flash_value[1] << 8;
-		g_lorawan_settings.send_repeat_time |= flash_value[2] << 16;
-		g_lorawan_settings.send_repeat_time |= flash_value[3] << 24;
-		MYLOG("AT_CMD", "Send frequency found %ld", g_lorawan_settings.send_repeat_time);
+		g_send_repeat_time = 0;
+		g_send_repeat_time |= flash_value[0] << 0;
+		g_send_repeat_time |= flash_value[1] << 8;
+		g_send_repeat_time |= flash_value[2] << 16;
+		g_send_repeat_time |= flash_value[3] << 24;
+		MYLOG("AT_CMD", "Send frequency found %ld", g_send_repeat_time);
 		return true;
 		break;
 	default:
@@ -519,10 +521,10 @@ bool save_at_setting(uint32_t setting_type)
 		return api.system.flash.set(GNSS_OFFSET, flash_value, 2);
 		break;
 	case SEND_FREQ_OFFSET:
-		flash_value[0] = (uint8_t)(g_lorawan_settings.send_repeat_time >> 0);
-		flash_value[1] = (uint8_t)(g_lorawan_settings.send_repeat_time >> 8);
-		flash_value[2] = (uint8_t)(g_lorawan_settings.send_repeat_time >> 16);
-		flash_value[3] = (uint8_t)(g_lorawan_settings.send_repeat_time >> 24);
+		flash_value[0] = (uint8_t)(g_send_repeat_time >> 0);
+		flash_value[1] = (uint8_t)(g_send_repeat_time >> 8);
+		flash_value[2] = (uint8_t)(g_send_repeat_time >> 16);
+		flash_value[3] = (uint8_t)(g_send_repeat_time >> 24);
 		flash_value[4] = 0xAA;
 		MYLOG("AT_CMD", "Writing send frequency 0X%02X 0X%02X 0X%02X 0X%02X ",
 			  flash_value[0], flash_value[1],
