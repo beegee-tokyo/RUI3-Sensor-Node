@@ -6,10 +6,10 @@ This code is _**Work in progress**_ and far from finished. But it can give a fir
 The code compiles on RAK4631. For RAK3172 examples see my other RUI3 examples     
 
 # Content
-- [Hardware supported](#hardware_supported)
-- [Software used](#software_used)
-- [Packet data format](#packet_data_format)
-- [Device setup](#device_setup)
+- [Hardware supported](#hardware-supported)
+- [Software used](#software-used)
+- [Packet data format](#packet-data-format)
+- [Device setup](#device-setup)
 
 ----
 
