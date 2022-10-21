@@ -17,7 +17,7 @@ The code compiles on RAK4631. For RAK3172 examples see my other RUI3 examples
 | Module | Function | Supported |
 | --     | --       | --          |
 | [RAK4631-R](https://docs.rakwireless.com/Product-Categories/WisBlock/RAK4631-R/Overview/) ⤴️ | WisBlock Core module with RUI3| ✔ |
-| [RAK5005-O](https://docs.rakwireless.com/Product-Categories/WisBlock/RAK5005-O/Overview/) ⤴️ | WisBlock Base board | ✔ |
+| [RAK19007](https://docs.rakwireless.com/Product-Categories/WisBlock/RAK19007/Overview/) ⤴️ | WisBlock Base board | ✔ |
 | [RAK19003](https://docs.rakwireless.com/Product-Categories/WisBlock/RAK19003/Overview/) ⤴️ | WisBlock Mini Base board | ✔ |
 | [RAK19001](https://docs.rakwireless.com/Product-Categories/WisBlock/RAK19001/Overview/) ⤴️ | WisBlock Fullsize Base board | ✔ |
 | [RAK1901](https://docs.rakwireless.com/Product-Categories/WisBlock/RAK1901/Overview/) ⤴️ | WisBlock Temperature and Humidty Sensor | ✔ |
@@ -51,10 +51,10 @@ The code compiles on RAK4631. For RAK3172 examples see my other RUI3 examples
 
 ## _LIMITATIONS_     
 - The RAK1904 module _**MUST**_ be installed in     
-    - Slot C of RAK5005-O, RAK19007 or RAK19001
+    - Slot C of RAK19007, RAK19007 or RAK19001
     - Slot A of RAK19003
 - The RAK1905 module _**MUST**_ be installed in     
-    - Slot C of RAK5005-O, RAK19007 or RAK19001
+    - Slot C of RAK19007, RAK19007 or RAK19001
     - Slot A of RAK19003
 - RAK1910 and RAK12500 cannot be used together (both are GNSS location trackers)
 
