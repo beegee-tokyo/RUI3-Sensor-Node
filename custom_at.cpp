@@ -76,11 +76,11 @@ int freq_send_handler(SERIAL_PORT port, char *cmd, stParam *param)
 
 		MYLOG("AT_CMD", "New frequency %ld", g_send_repeat_time);
 		// Stop the timer
-		udrv_timer_stop(TIMER_0);
+		api.system.timer.stop(RAK_TIMER_0);
 		if (g_send_repeat_time != 0)
 		{
 			// Restart the timer
-			udrv_timer_start(TIMER_0, g_send_repeat_time, NULL);
+			api.system.timer.start(RAK_TIMER_0, g_send_repeat_time, NULL);
 		}
 		// Save custom settings
 		save_at_setting(SEND_FREQ_OFFSET);

@@ -214,10 +214,10 @@ void int_callback_rak1904(void)
 		last_trigger = millis();
 		// Read the sensors and trigger a packet
 		sensor_handler(NULL);
-		// Stop a unified C timer in C language. This API is defined in udrv_timer.h. It will be replaced by api.system.timer.stop() after story #1195 is done.
-		udrv_timer_stop(TIMER_0);
-		// Start a unified C timer in C language. This API is defined in udrv_timer.h. It will be replaced by api.system.timer.start() after story #1195 is done.
-		udrv_timer_start(TIMER_0, g_send_repeat_time, NULL);
+		// Stop a timer.
+		api.system.timer.stop(RAK_TIMER_0);
+		// Start a timer.
+		api.system.timer.start(RAK_TIMER_0, g_send_repeat_time, NULL);
 	}
 	else
 	{
@@ -371,10 +371,10 @@ void clear_int_rak1904(void)
 // 		last_trigger = millis();
 // 		// Read the sensors and trigger a packet
 // 		sensor_handler(NULL);
-// 		// Stop a unified C timer in C language. This API is defined in udrv_timer.h. It will be replaced by api.system.timer.stop() after story #1195 is done.
-// 		udrv_timer_stop(TIMER_0);
-// 		// Start a unified C timer in C language. This API is defined in udrv_timer.h. It will be replaced by api.system.timer.start() after story #1195 is done.
-// 		udrv_timer_start(TIMER_0, g_send_repeat_time, NULL);
+// 		// Stop a timer.
+// 		api.system.timer.stop(RAK_TIMER_0);
+// 		// Start a timer.
+// 		api.system.timer.start(RAK_TIMER_0, g_send_repeat_time, NULL);
 // 		motion_detected = true;
 // 	}
 // 	clear_int_rak1904();
@@ -520,10 +520,10 @@ void clear_int_rak1904(void)
 // 		last_trigger = millis();
 // 		// Read the sensors and trigger a packet
 // 		sensor_handler(NULL);
-// 		// Stop a unified C timer in C language. This API is defined in udrv_timer.h. It will be replaced by api.system.timer.stop() after story #1195 is done.
-// 		udrv_timer_stop(TIMER_0);
-// 		// Start a unified C timer in C language. This API is defined in udrv_timer.h. It will be replaced by api.system.timer.start() after story #1195 is done.
-// 		udrv_timer_start(TIMER_0, g_send_repeat_time, NULL);
+// 		// Stop a timer.
+// 		api.system.timer.stop(RAK_TIMER_0);
+// 		// Start a timer.
+// 		api.system.timer.start(RAK_TIMER_0, g_send_repeat_time, NULL);
 // 		motion_detected = true;
 // 	}
 // 	clear_int_rak1904();

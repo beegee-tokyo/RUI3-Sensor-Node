@@ -182,20 +182,20 @@ void setup()
 	// Get saved sending frequency from flash
 	get_at_setting(SEND_FREQ_OFFSET);
 
-	// Create a unified timer in C language. This API is defined in udrv_timer.h. It will be replaced by api.system.timer.create() after story #1195 is done.
-	udrv_timer_create(TIMER_0, sensor_handler, HTMR_PERIODIC);
+	// Create a timer.
+	api.system.timer.create(RAK_TIMER_0, sensor_handler, RAK_TIMER_PERIODIC);
 	if (g_send_repeat_time != 0)
 	{
-		// Start a unified C timer in C language. This API is defined in udrv_timer.h. It will be replaced by api.system.timer.start() after story #1195 is done.
-		udrv_timer_start(TIMER_0, g_send_repeat_time, NULL);
+		// Start a timer.
+		api.system.timer.start(RAK_TIMER_0, g_send_repeat_time, NULL);
 	}
 
 	// If a GNSS module was found, setup a timer for the GNSS aqcuisions
 	if (found_sensors[GNSS_ID].found_sensor)
 	{
 		MYLOG("SETUP", "Create timer for GNSS polling");
-		// Create a unified timer in C language. This API is defined in udrv_timer.h. It will be replaced by api.system.timer.create() after story #1195 is done.
-		udrv_timer_create(TIMER_1, gnss_handler, HTMR_PERIODIC); // HTMR_ONESHOT);
+		// Create a timer.
+		api.system.timer.create(RAK_TIMER_1, gnss_handler, RAK_TIMER_PERIODIC); // HTMR_ONESHOT);
 	}
 
 	// MYLOG("SETUP", "Waiting for Lorawan join...");
@@ -353,7 +353,7 @@ void send_packet(void)
 	}
 
 	// Send the packet
-	if (api.lorawan.send(g_solution_data.getSize(), g_solution_data.getBuffer(), set_fPort, g_confirmed_mode, g_confirmed_retry))
+	if (api.lorawan.send(g_solution_data.getSize(), g_solution_data.getBuffer(), set_fPort)) // , g_confirmed_mode, g_confirmed_retry))
 	{
 		MYLOG("UPLINK", "Packet enqueued");
 	}
