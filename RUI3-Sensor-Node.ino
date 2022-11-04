@@ -353,7 +353,7 @@ void send_packet(void)
 	}
 
 	// Send the packet
-	if (api.lorawan.send(g_solution_data.getSize(), g_solution_data.getBuffer(), set_fPort)) // , g_confirmed_mode, g_confirmed_retry))
+	if (api.lorawan.send(g_solution_data.getSize(), g_solution_data.getBuffer(), set_fPort, g_confirmed_mode, g_confirmed_retry))
 	{
 		MYLOG("UPLINK", "Packet enqueued");
 	}
