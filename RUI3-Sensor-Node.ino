@@ -329,7 +329,8 @@ void sensor_handler(void *)
  */
 void loop()
 {
-	api.system.sleep.all();
+	// api.system.sleep.all();
+	api.system.scheduler.task.destroy();
 }
 
 /**
