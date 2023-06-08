@@ -195,6 +195,6 @@ extern date_time_s g_date_time;
 
 /** GNSS settings offset in flash */
 #define GNSS_OFFSET 0x00000000		// length 1 byte
-#define SEND_FREQ_OFFSET 0x00000002 // length 4 bytes
+#define SEND_INTERVAL_OFFSET 0x00000002 // length 4 bytes
 
 #endif

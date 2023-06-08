@@ -208,7 +208,7 @@ void int_callback_rak1904(void)
 {
 	MYLOG("ACC", "Interrupt triggered");
 	// detachInterrupt(acc_int_pin);
-	if ((millis() - last_trigger) > (g_send_repeat_time / 2) && !gnss_active)
+	if ((millis() - last_trigger) > (g_send_interval_time / 2) && !gnss_active)
 	{
 		motion_detected = true;
 		last_trigger = millis();
@@ -217,7 +217,7 @@ void int_callback_rak1904(void)
 		// Stop a timer.
 		api.system.timer.stop(RAK_TIMER_0);
 		// Start a timer.
-		api.system.timer.start(RAK_TIMER_0, g_send_repeat_time, NULL);
+		api.system.timer.start(RAK_TIMER_0, g_send_interval_time, NULL);
 	}
 	else
 	{
@@ -374,7 +374,7 @@ void clear_int_rak1904(void)
 // 		// Stop a timer.
 // 		api.system.timer.stop(RAK_TIMER_0);
 // 		// Start a timer.
-// 		api.system.timer.start(RAK_TIMER_0, g_send_repeat_time, NULL);
+// 		api.system.timer.start(RAK_TIMER_0, g_send_interval_time, NULL);
 // 		motion_detected = true;
 // 	}
 // 	clear_int_rak1904();
@@ -523,7 +523,7 @@ void clear_int_rak1904(void)
 // 		// Stop a timer.
 // 		api.system.timer.stop(RAK_TIMER_0);
 // 		// Start a timer.
-// 		api.system.timer.start(RAK_TIMER_0, g_send_repeat_time, NULL);
+// 		api.system.timer.start(RAK_TIMER_0, g_send_interval_time, NULL);
 // 		motion_detected = true;
 // 	}
 // 	clear_int_rak1904();

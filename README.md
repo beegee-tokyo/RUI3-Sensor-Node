@@ -167,7 +167,7 @@ AT+BAND=10
 AT+DEVEUI=1000000000000001
 AT+APPEUI=AB00AB00AB00AB00
 AT+APPKEY=AB00AB00AB00AB00AB00AB00AB00AB00
-ATC+SENDFREQ=600
+ATC+SENDINT=600
 ```
 
 | Command | Explanation | 
@@ -178,7 +178,7 @@ ATC+SENDFREQ=600
 | AT+DEVEUI=1000000000000001 | set the device EUI, best to use the DevEUI that is printed on the label of your WisBlock Core module |
 | AT+APPEUI=AB00AB00AB00AB00 | set the application EUI, required on the LoRaWAN server |
 | | AT+APPKEY=AB00AB00AB00AB00AB00AB00AB00AB00 | set the application Key, used to encrypt the data packet during network join |
-ATC+SENDFREQ=600 | set the frequency the sensor node will send data packets. 600 == 10 x 60 seconds == 10minutes |
+ATC+SENDINT=600 | set the interval the sensor node will send data packets. 600 == 10 x 60 seconds == 10minutes |
 
 ### _REMARK_
 The manual for all AT commands can be found here: [AT-Command Manual](https://docs.rakwireless.com/RUI3/Serial-Operating-Modes/AT-Command-Manual/) ⤴️
@@ -211,16 +211,16 @@ AppKey = 2B84E0B09B68E5CB42176FE753DCEE79
 OK
 ```
 
-**`ATC+SENDFREQ`** to get and set the automatic send interval
+**`ATC+SENDINT`** to get and set the automatic send interval
 
 Example:
 ```log
-atc+sendfreq=?
+atc+sendint=?
 
-ATC+SENDFREQ=120s
+ATC+SENDINT=120s
 OK
 
-atc+sendfreq=120
+atc+sendint=120
 OK
 ```
 

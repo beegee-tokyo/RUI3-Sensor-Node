@@ -9,7 +9,6 @@
  *
  */
 #include "main.h"
-#include "udrv_timer.h"
 
 /** Initialization results */
 bool ret;
@@ -159,6 +158,56 @@ void setup()
 	delay(5000);
 #endif
 
+	// USE BELOW WHEN CREDENTIALS ARE NOT SET THROUGH AT COMMANDS
+
+	// uint8_t node_device_eui[8] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x88};
+
+	// uint8_t node_app_eui[8] = {0x0E, 0x0D, 0x0D, 0x01, 0x0E, 0x01, 0x02, 0x0E};
+
+	// uint8_t node_app_key[16] = {0x2B, 0x7E, 0x15, 0x16, 0x28, 0xAE, 0xD2, 0xA6, 0xAB, 0xF7, 0x15, 0x88, 0x09, 0xCF, 0x4F, 0x3E};
+
+
+	// api.lorawan.deui.get(node_device_eui, 8);
+	// api.lorawan.appeui.get(node_app_eui, 8);
+	// api.lorawan.appkey.get(node_app_key, 16);
+
+	// Serial.print("DevEUI: ");
+	// for (int idx=0; idx < 8; idx++)
+	// {
+	// 	Serial.printf("%02X", node_device_eui[idx]);
+	// }
+	// Serial.println();
+
+	// Serial.print("AppEUI: ");
+	// for (int idx = 0; idx < 8; idx++)
+	// {
+	// 	Serial.printf("%02X", node_app_eui[idx]);
+	// }
+	// Serial.println();
+
+	// Serial.print("AppKey: ");
+	// for (int idx = 0; idx < 16; idx++)
+	// {
+	// 	Serial.printf("%02X", node_app_key[idx]);
+	// }
+	// Serial.println();
+
+	// if (api.lorawan.appeui.set(node_app_eui, 8) == true)
+	// 	Serial.println("LoRaWan AppEUI set success");
+	// else
+	// 	Serial.println("LoRaWan AppEUI set fail");
+
+	// if (api.lorawan.appkey.set(node_app_key, 16) == true)
+	// 	Serial.println("LoRaWan AppKey set success");
+	// else
+	// 	Serial.println("LoRaWan AppKey set fail");
+
+	// if (api.lorawan.deui.set(node_device_eui, 8) == true)
+	// 	Serial.println("LoRaWan device EUI set success");
+	// else
+	// 	Serial.println("LoRaWan device EUI set fail");
+
+
 	// Find WisBlock I2C modules
 	find_modules();
 
@@ -174,20 +223,20 @@ void setup()
 	}
 	digitalWrite(LED_GREEN, LOW);
 
-	// Register the custom AT command to set the send frequency
+	// Register the custom AT command to set the send interval
 	if (!init_frequency_at())
 	{
 		MYLOG("SETUP", "Add custom AT command Send Interval fail");
 	}
 	// Get saved sending frequency from flash
-	get_at_setting(SEND_FREQ_OFFSET);
+	get_at_setting(SEND_INTERVAL_OFFSET);
 
 	// Create a timer.
 	api.system.timer.create(RAK_TIMER_0, sensor_handler, RAK_TIMER_PERIODIC);
-	if (g_send_repeat_time != 0)
+	if (g_send_interval_time != 0)
 	{
 		// Start a timer.
-		api.system.timer.start(RAK_TIMER_0, g_send_repeat_time, NULL);
+		api.system.timer.start(RAK_TIMER_0, g_send_interval_time, NULL);
 	}
 
 	// If a GNSS module was found, setup a timer for the GNSS aqcuisions
@@ -214,7 +263,7 @@ void setup()
 /**
  * @brief GNSS location aqcuisition
  * Called every 2.5 seconds by timer 1
- * Gives up after 1/2 of send frequency
+ * Gives up after 1/2 of send interval
  * or when location was aquired
  *
  */
@@ -251,7 +300,7 @@ void gnss_handler(void *)
 
 /**
  * @brief sensor_handler is a timer function called every
- * g_send_repeat_time milliseconds. Default is 120000. Can be
+ * g_send_interval_time milliseconds. Default is 120000. Can be
  * changed in main.h
  *
  */
@@ -307,8 +356,8 @@ void sensor_handler(void *)
 		// Start the timer
 		udrv_timer_start(TIMER_1, 2500, NULL);
 		check_gnss_counter = 0;
-		// Max location aquisition time is half of send frequency
-		check_gnss_max_try = g_send_repeat_time / 2 / 2500;
+		// Max location aquisition time is half of send interval
+		check_gnss_max_try = g_send_interval_time / 2 / 2500;
 	}
 	else if (gnss_active)
 	{

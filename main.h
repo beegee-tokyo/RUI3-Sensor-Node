@@ -46,7 +46,7 @@
 // Globals
 extern char g_dev_name[];
 extern bool g_has_rak15001;
-extern uint32_t g_send_repeat_time;
+extern uint32_t g_send_interval_time;
 
 /** Module stuff */
 #include "module_handler.h"
