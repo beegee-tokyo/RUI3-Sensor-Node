@@ -100,10 +100,10 @@ bool init_rak12047(void)
 	discard_counter = 0;
 
 	// Set VOC reading interval to 10 seconds
-	// Create a unified timer in C language. This API is defined in udrv_timer.h. It will be replaced by api.system.timer.create() after story #1195 is done.
-	udrv_timer_create(TIMER_1, do_read_rak12047, HTMR_PERIODIC);
-	// Start a unified C timer in C language. This API is defined in udrv_timer.h. It will be replaced by api.system.timer.start() after story #1195 is done.
-	udrv_timer_start(TIMER_1, sampling_interval * 1000, NULL);
+	// Create a timer
+	api.system.timer.create(RAK_TIMER_2, do_read_rak12047, RAK_TIMER_PERIODIC);
+	// Start a timer
+	api.system.timer.start(RAK_TIMER_2, sampling_interval * 1000, NULL);
 
 	return true;
 }

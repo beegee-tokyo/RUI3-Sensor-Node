@@ -276,7 +276,7 @@ void gnss_handler(void *)
 		digitalWrite(WB_IO2, LOW);
 		delay(100);
 		MYLOG("GNSS", "Got location");
-		udrv_timer_stop(TIMER_1);
+		api.system.timer.stop(RAK_TIMER_1);
 		send_packet();
 	}
 	else
@@ -287,7 +287,7 @@ void gnss_handler(void *)
 			digitalWrite(WB_IO2, LOW);
 			delay(100);
 			MYLOG("GNSS", "Location timeout");
-			udrv_timer_stop(TIMER_1);
+			api.system.timer.stop(RAK_TIMER_1);
 			if (gnss_format != HELIUM_MAPPER)
 			{
 				send_packet();
@@ -354,7 +354,7 @@ void sensor_handler(void *)
 		// Startup GNSS module
 		init_gnss();
 		// Start the timer
-		udrv_timer_start(TIMER_1, 2500, NULL);
+		api.system.timer.start(RAK_TIMER_1, 2500, NULL);
 		check_gnss_counter = 0;
 		// Max location aquisition time is half of send interval
 		check_gnss_max_try = g_send_interval_time / 2 / 2500;

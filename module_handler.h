@@ -100,6 +100,30 @@ extern volatile sensors_t found_sensors[];
 #define LPP_CHANNEL_CO2_HUMID_2 37	   // RAK12037
 #define LPP_CHANNEL_TEMP_3 38		   // RAK12003
 #define LPP_CHANNEL_TEMP_4 39		   // RAK12003
+#define LPP_CHANNEL_PM_1_0 40		   // RAK12039
+#define LPP_CHANNEL_PM_2_5 41		   // RAK12039
+#define LPP_CHANNEL_PM_10_0 42		   // RAK12039
+#define LPP_CHANNEL_EQ_EVENT 43		   // RAK12027
+#define LPP_CHANNEL_EQ_SI 44		   // RAK12027
+#define LPP_CHANNEL_EQ_PGA 45		   // RAK12027
+#define LPP_CHANNEL_EQ_SHUTOFF 46	   // RAK12027
+#define LPP_CHANNEL_EQ_COLLAPSE 47	   // RAK12027
+#define LPP_CHANNEL_SWITCH 48		   // RAK13011
+#define LPP_SH_WS 49				   // SensorHub RK900-09
+#define LPP_SH_WD 50				   // SensorHub RK900-09
+#define LPP_AUDIO_L_A 51			   // WisBlock Audio
+#define LPP_AUDIO_L_C 52			   // WisBlock Audio
+#define LPP_AUDIO_ALARM 53			   // WisBlock Audio
+#define LPP_AUDIO_TYPE 54			   // WisBlock Audio
+#define LPP_SH_SOIL_MOIST 55		   // SensorHub RK500-02
+#define LPP_SH_EC 56				   // SensorHub RK500-02
+#define LPP_SH_PH_H 57				   // SensorHub RK500-02
+#define LPP_SH_PH_L 58				   // SensorHub RK500-02
+#define LPP_SH_PYRANO 59			   // SensorHub RK200-03
+#define LPP_SH_HUMID_PREC 60		   // SensorHub RK520-02
+#define LPP_CHANNEL_WLEVEL 61		   // RAK12059
+#define LPP_CHANNEL_WL_LOW 62		   // RAK12059
+#define LPP_CHANNEL_WL_HIGH 63		   // RAK12059
 
 extern WisCayenne g_solution_data;
 
@@ -196,5 +220,13 @@ extern date_time_s g_date_time;
 /** GNSS settings offset in flash */
 #define GNSS_OFFSET 0x00000000		// length 1 byte
 #define SEND_INTERVAL_OFFSET 0x00000002 // length 4 bytes
+
+// RAK12007
+#define TRIG WB_IO6
+#define ECHO WB_IO4
+#define PD WB_IO5 // power done control （=1 power done，=0 power on）
+
+bool init_rak12007(void);
+bool read_rak12007(bool add_payload = true);
 
 #endif

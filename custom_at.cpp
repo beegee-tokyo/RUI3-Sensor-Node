@@ -407,18 +407,18 @@ int status_handler(SERIAL_PORT port, char *cmd, stParam *param)
 		}
 		else if (nw_mode == 0)
 		{
-			Serial.printf("Frequency = %d\r\n", api.lorawan.pfreq.get());
-			Serial.printf("SF = %d\r\n", api.lorawan.psf.get());
-			Serial.printf("BW = %d\r\n", api.lorawan.pbw.get());
-			Serial.printf("CR = %d\r\n", api.lorawan.pcr.get());
-			Serial.printf("Preamble length = %d\r\n", api.lorawan.ppl.get());
-			Serial.printf("TX power = %d\r\n", api.lorawan.ptp.get());
+			Serial.printf("Frequency = %d\r\n", api.lora.pfreq.get());
+			Serial.printf("SF = %d\r\n", api.lora.psf.get());
+			Serial.printf("BW = %d\r\n", api.lora.pbw.get());
+			Serial.printf("CR = %d\r\n", api.lora.pcr.get());
+			Serial.printf("Preamble length = %d\r\n", api.lora.ppl.get());
+			Serial.printf("TX power = %d\r\n", api.lora.ptp.get());
 		}
 		else
 		{
-			Serial.printf("Frequency = %d\r\n", api.lorawan.pfreq.get());
-			Serial.printf("Bitrate = %d\r\n", api.lorawan.pbr.get());
-			Serial.printf("Deviaton = %d\r\n", api.lorawan.pfdev.get());
+			Serial.printf("Frequency = %d\r\n", api.lora.pfreq.get());
+			Serial.printf("Bitrate = %d\r\n", api.lora.pbr.get());
+			Serial.printf("Deviaton = %d\r\n", api.lora.pfdev.get());
 		}
 		announce_modules();
 	}

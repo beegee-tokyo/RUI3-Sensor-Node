@@ -10,9 +10,9 @@
  */
 #include <Arduino.h>
 
-#ifdef _VARIANT_RAK3172_
-#error This code is too large for RAk3172, check the separate examples for RAK3172
-#endif
+// #ifdef _VARIANT_RAK3172_
+// #error This code is too large for RAk3172, check the separate examples for RAK3172
+// #endif
 // Debug
 // Debug output set to 0 to disable app debug output
 #ifndef MY_DEBUG
@@ -31,16 +31,6 @@
 	delay(100)
 #else
 #define MYLOG(...)
-#endif
-
-#ifndef RAK_REGION_AS923_2
-#define RAK_REGION_AS923_2 9
-#endif
-#ifndef RAK_REGION_AS923_3
-#define RAK_REGION_AS923_3 10
-#endif
-#ifndef RAK_REGION_AS923_4
-#define RAK_REGION_AS923_4 11
 #endif
 
 // Globals
